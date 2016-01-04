@@ -1,0 +1,5 @@
+name: nexx integration
+type: module
+description: 'Integration of nexxOMNIA and nexxPLAY '
+package: Media
+core: 8.x
