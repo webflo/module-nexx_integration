@@ -12,5 +12,6 @@ nexx_integration.omnia_notification_gateway:
     _auth: [ 'basic_auth' ]
   requirements:
     _user_is_logged_in: 'TRUE'
+    _permission: 'use omnia notification gateway'
   defaults:
     _controller: '\Drupal\nexx_integration\Controller\Omnia::video'
