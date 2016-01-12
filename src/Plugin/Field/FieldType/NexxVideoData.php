@@ -19,12 +19,11 @@ use Drupal\Core\TypedData\DataDefinition;
  *   id = "nexx_video_data",
  *   label = @Translation("Nexx Video data"),
  *   description = @Translation("Stores data as given by nexxOMNIA ping servic when a video has been created or modified."),
- *   no_ui = TRUE,
- *   default_formatter = "video_player",
- *   default_widget = "video_info",
+ *   default_formatter = "nexx_video_player",
+ *   default_widget = "nexx_video_info",
  * )
  */
-class IvwSettings extends FieldItemBase {
+class NexxVideoData extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
@@ -69,6 +68,7 @@ class IvwSettings extends FieldItemBase {
         ),
         'actors_ids' => array(
           'type' => 'varchar',
+          'length' => 256,
         ),
 
         'isSSC' => array(
@@ -178,7 +178,7 @@ class IvwSettings extends FieldItemBase {
       ->setLabel(t('Alternative description'));
     $properties['uploaded'] = DataDefinition::create('timestamp')
       ->setLabel(t('Time of upload'));
-    $properties['channel_id'] = DataDefinition::create('int')
+    $properties['channel_id'] = DataDefinition::create('integer')
       ->setLabel(t('Channel ID'));
     $properties['actors_ids'] = DataDefinition::create('string')
       ->setLabel(t('Actor IDs'));

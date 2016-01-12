@@ -1,0 +1,10 @@
+nexx_integration.settings:
+  type: mapping
+  label: 'nexx Settings'
+  mapping:
+    video_entity:
+      type: string
+      label: 'The entity which represents the video.'
+    video_bundle:
+      type: string
+      label: 'The bundle of the entity which is used.'
