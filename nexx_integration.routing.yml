@@ -5,3 +5,12 @@ nexx_integration.admin_settings:
     _title: 'nexx Video settings'
   requirements:
     _permission: 'administer site configuration'
+
+nexx_integration.omnia_notification_gateway:
+  path: '/services/omnia/video'
+  options:
+    _auth: [ 'basic_auth' ]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  defaults:
+    _controller: '\Drupal\nexx_integration\Controller\Omnia::video'
