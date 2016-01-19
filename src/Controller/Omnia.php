@@ -5,9 +5,15 @@ namespace Drupal\nexx_integration\Controller;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Symfony\Component\HttpFoundation\Request;
 
 class Omnia extends ControllerBase {
+  /**
+   *
+   */
+  protected $mediaEntity;
+
   /**
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
@@ -37,6 +43,11 @@ class Omnia extends ControllerBase {
       throw new \Exception('ItemID missing');
     }
 
+    $entityTypeBundleInfo = $this->entityTypeBundleInfo();
+
+    foreach($entityTypeBundleInfo as $bundleInfo){
+
+    }
     $ids = $query->condition('field_video_data.item_id', $itemID)->execute();
 
     if ($id = array_pop($ids)) {
@@ -50,21 +61,28 @@ class Omnia extends ControllerBase {
     return $response;
   }
 
-  private function updateVideo($id, $videoData) {
-    $storage = $this->mediaEntityStorage();
-    $media = $storage->load($id);
+  protected function updateVideo($id, $videoData) {
+    $media = $this->mediaEntity($id);
 
     $this->mapData($media, $videoData);
     $media->save();
   }
 
-  private function createVideo($id, $videoData) {
+  protected function createVideo($id, $videoData) {
 
   }
 
-  private function mapData(EntityInterface $media, $videoData) {
-    $entityType = $this->mediaEntityDefinition();
+  protected function mediaEntity($id) {
+    if (!isset($this->mediaEntity)) {
+      $storage = $this->mediaEntityStorage();
+      $this->mediaEntity = $storage->load($id);
+    }
+    return $this->mediaEntity;
+  }
 
+  protected function mapData(EntityInterface $media, $videoData) {
+    $entityType = $this->mediaEntityDefinition();
+    $videoField = $this->videoFieldName($media);
     $labelKey = $entityType->getKey('label');
     $media->$videoField->
 
@@ -100,7 +118,7 @@ class Omnia extends ControllerBase {
     return $this->mediaEntityDefinition;
   }
 
-  protected function videoFieldName($media_id) {
+  protected function videoFieldName($media) {
     foreach($media->getFieldDefinitions() as $fieldname => $fieldDefinition){
       if($fieldDefinition->getType() ===  'nexx_video_data') {
         $videoField = $fieldname;
@@ -111,5 +129,18 @@ class Omnia extends ControllerBase {
     if(empty($videoField)) {
       throw new \Exception('No video data field defined');
     }
+  }
+
+  /**
+   * Retrieves the entity bundle manager.
+   *
+   * @return \Drupal\Core\Entity\EntityTypeBundleInfo
+   *   The entity type bundle info.
+   */
+  protected function entityTypeBundleInfo() {
+    if (!isset($this->entityTypeBundleInfo)) {
+      $this->entityTypeBundleInfo = $this->container->get('entity_type.bundle.info')->getAllBundleInfo();
+    }
+    return $this->entityTypeBundleInfo;
   }
 }
