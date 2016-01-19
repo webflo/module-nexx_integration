@@ -139,7 +139,7 @@ class Omnia extends ControllerBase {
    */
   protected function entityTypeBundleInfo() {
     if (!isset($this->entityTypeBundleInfo)) {
-      $this->entityTypeBundleInfo = $this->container->get('entity_type.bundle.info')->getAllBundleInfo();
+      $this->entityTypeBundleInfo = $this->container->get('entity_type.bundle.info')->getBundleInfo('media');
     }
     return $this->entityTypeBundleInfo;
   }
