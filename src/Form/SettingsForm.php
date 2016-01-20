@@ -68,7 +68,35 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
     $settings = $this->config('nexx_integration.settings');
+
     $entity_type_id = !empty($values['type_settings']['video_entity']) ? $values['type_settings']['video_entity'] : $settings->get('video_entity');
+
+    $form['vocabulary_settings'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#prefix' => '<div id="nexx-vocabular-settings-wrapper">',
+      '#suffix' => '</div>',
+    ];
+
+    $vocabulary = $this->entityManager->getDefinition('taxonomy_term');
+    $bundle = !empty($values['type_settings']['channel_vocabulary']) ? $values['type_settings']['channel_vocabulary'] : $settings->get('channel_vocabulary');
+    $form['vocabulary_settings']['channel_vocabulary'] = [
+      '#type' => 'select',
+      '#title' => 'Channel ' . $vocabulary->getBundleLabel() ?: $this->t('Bundles'),
+      '#options' => $this->getEntityBundleOptions($vocabulary),
+      '#default_value' => $bundle,
+      '#description' => $this->t('The bundle which is used for videos.'),
+    ];
+
+    $bundle = !empty($values['type_settings']['actor_vocabulary']) ? $values['type_settings']['actor_vocabulary'] : $settings->get('actor_vocabulary');
+    $form['vocabulary_settings']['actor_vocabulary'] = [
+      '#type' => 'select',
+      '#title' => 'Actor ' . $vocabulary->getBundleLabel() ?: $this->t('Bundles'),
+      '#options' => $this->getEntityBundleOptions($vocabulary),
+      '#default_value' => $bundle,
+      '#description' => $this->t('The bundle which is used for actors.'),
+    ];
+
 
     // Add the embed type plugin settings.
     $form['type_settings'] = [
@@ -78,33 +106,6 @@ class SettingsForm extends ConfigFormBase {
       '#suffix' => '</div>',
     ];
 
-
-    $form['type_settings']['video_entity'] = array(
-      '#type' => 'select',
-      '#title' => $this->t('Entity type'),
-      '#options' => $this->getEntityTypeOptions(),
-      '#default_value' => $entity_type_id,
-      '#description' => $this->t("Entity type which is used for video."),
-      '#required' => TRUE,
-      '#ajax' => array(
-        'callback' => array($form_state->getFormObject(), 'updateTypeSettings'),
-        'effect' => 'fade',
-      ),
-      //'#disabled' => !$embed_button->isNew(),
-    );
-
-    if ($entity_type_id) {
-      $entity_type = $this->entityManager->getDefinition($entity_type_id);
-      $bundle = !empty($values['type_settings']['video_bundle']) ? $values['type_settings']['video_bundle'] : $settings->get('video_bundle');
-      $form['type_settings']['video_bundle'] = array(
-        '#type' => 'select',
-        '#title' => $entity_type->getBundleLabel() ?: $this->t('Bundles'),
-        '#options' => $this->getEntityBundleOptions($entity_type),
-        '#default_value' => $bundle,
-        '#description' => $this->t('The bundle which is used for videos.'),
-      );
-      $form['type_settings']['bundles']['#access'] = !empty($form['bundles']['#options']);
-    }
     return parent::buildForm($form, $form_state);
   }
 
@@ -115,8 +116,8 @@ class SettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
 
     $this->config('nexx_integration.settings')
-      ->set('video_entity', $values['type_settings']['video_entity'])
-      ->set('video_bundle', $values['type_settings']['video_bundle'])
+      ->set('channel_vocabulary', $values['vocabulary_settings']['channel_vocabulary'])
+      ->set('actor_vocabulary', $values['vocabulary_settings']['actor_vocabulary'])
       ->save();
   }
 

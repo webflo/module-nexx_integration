@@ -2,9 +2,9 @@ nexx_integration.settings:
   type: mapping
   label: 'nexx Settings'
   mapping:
-    video_entity:
+    channel_vocabulary:
       type: string
-      label: 'The entity which represents the video.'
-    video_bundle:
+      label: 'The vocabulary containing channel information.'
+    actor_vocabulary:
       type: string
-      label: 'The bundle of the entity which is used.'
+      label: 'The vocabulary containing channel information.'
