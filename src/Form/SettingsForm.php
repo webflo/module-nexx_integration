@@ -69,8 +69,6 @@ class SettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
     $settings = $this->config('nexx_integration.settings');
 
-    $entity_type_id = !empty($values['type_settings']['video_entity']) ? $values['type_settings']['video_entity'] : $settings->get('video_entity');
-
     $form['vocabulary_settings'] = [
       '#type' => 'container',
       '#tree' => TRUE,
@@ -106,6 +104,16 @@ class SettingsForm extends ConfigFormBase {
       '#suffix' => '</div>',
     ];
 
+    $entity_type = $this->entityManager->getDefinition('media');
+    $bundle = !empty($values['type_settings']['video_bundle']) ? $values['type_settings']['video_bundle'] : $settings->get('video_bundle');
+    $form['type_settings']['video_bundle'] = array(
+      '#type' => 'select',
+      '#title' => $entity_type->getBundleLabel() ?: $this->t('Bundles'),
+      '#options' => $this->getEntityBundleOptions($entity_type),
+      '#default_value' => $bundle,
+      '#description' => $this->t('The bundle which is used for videos.'),
+    );
+    $form['type_settings']['bundles']['#access'] = !empty($form['bundles']['#options']);
     return parent::buildForm($form, $form_state);
   }
 
@@ -116,6 +124,7 @@ class SettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
 
     $this->config('nexx_integration.settings')
+      ->set('video_bundle', $values['type_settings']['video_bundle'])
       ->set('channel_vocabulary', $values['vocabulary_settings']['channel_vocabulary'])
       ->set('actor_vocabulary', $values['vocabulary_settings']['actor_vocabulary'])
       ->save();

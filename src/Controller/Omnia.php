@@ -43,7 +43,10 @@ class Omnia extends ControllerBase {
    *    The date formatter service.
    * @param EntityFieldManagerInterface $entity_field_manager
    */
-  public function __construct(EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityFieldManagerInterface $entity_field_manager) {
+  public function __construct(
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+    EntityFieldManagerInterface $entity_field_manager
+  ) {
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->entityFieldManager = $entity_field_manager;
   }
@@ -52,9 +55,7 @@ class Omnia extends ControllerBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.bundle.info'),
-      $container->get('entity_field.manager')
+    return new static($container->get('entity_type.bundle.info'), $container->get('entity_field.manager')
     );
   }
 
@@ -70,40 +71,39 @@ class Omnia extends ControllerBase {
       $videoData = json_decode($content);
     }
 
-    if (isset($videoData->itemID)) {
-      $itemID = $videoData->itemID;
-    }
-    else {
+    if (!isset($videoData->itemID)) {
       throw new \Exception('ItemID missing');
     }
+
     $video_field = $this->videoFieldName();
-    $ids = $query->condition($video_field . '.item_id', $itemID)->execute();
+    $ids = $query->condition($video_field . '.item_id', $videoData->itemID)
+      ->execute();
 
     if ($id = array_pop($ids)) {
-      $this->updateVideo($id, $videoData);
+      $media = $this->mediaEntity($id);
     }
     else {
-      $this->createVideo($videoData);
+      $media = $this->mediaEntity();
     }
+    $this->mapData($media, $videoData);
+    $media->save();
 
     $response->setContent();
     return $response;
   }
 
-  protected function updateVideo($id, $videoData) {
-    $media = $this->mediaEntity($id);
-    $this->mapData($media, $videoData);
-    $media->save();
-  }
 
-  protected function createVideo($id, $videoData) {
-
-  }
-
-  protected function mediaEntity($id) {
+  protected function mediaEntity($id = NULL) {
     if (!isset($this->mediaEntity)) {
       $storage = $this->mediaEntityStorage();
-      $this->mediaEntity = $storage->load($id);
+      if ($id) {
+        $this->mediaEntity = $storage->load($id);
+      }
+      else {
+        $videoBundle = $this->config('nexx_integration.settings')
+          ->get('video_bundle');
+        $this->mediaEntity = $storage->create(['bundle' => $videoBundle]);
+      }
     }
     return $this->mediaEntity;
   }
@@ -113,17 +113,13 @@ class Omnia extends ControllerBase {
     $channel_taxonomy = $this->channelTaxonomy();
     $actor_taxonomy = $this->actorTaxonomy();
 
-    $actors = [];
-    foreach(explode(',', $videoData->itemData->actors_ids) as $actor) {
-      $actors[] = $this->termId($actor_taxonomy, $actor);
-    }
-    $channel = $this->termId($channel_taxonomy, $videoData->itemData->channel);
-
-
+    $channelField = $this->taxonomyFieldName($channel_taxonomy, $media);
+    $actorField = $this->taxonomyFieldName($actor_taxonomy, $media);
 
     $videoField = $this->videoFieldName();
     $labelKey = $entityType->getKey('label');
 
+    $media->$videoField->item_id = $videoData->itemID;
     $media->$videoField->title = $videoData->itemData->title;
     $media->$videoField->alttitle = $videoData->itemData->alttitle;
     $media->$videoField->subtitle = $videoData->itemData->subtitle;
@@ -131,8 +127,8 @@ class Omnia extends ControllerBase {
     $media->$videoField->description = $videoData->itemData->description;
     $media->$videoField->altdescription = $videoData->itemData->altdescription;
     $media->$videoField->uploaded = $videoData->itemData->uploaded;
-    $media->$videoField->channelid = $channel->id();
-    $media->$videoField->actors_ids = implode(',', $actors);
+    $media->$videoField->channel_id = $videoData->itemData->channel_id;
+    $media->$videoField->actors_ids = $videoData->itemData->actors_ids;
     $media->$videoField->isSSC = $videoData->itemStates->isSSC;
     $media->$videoField->encodedSSC = $videoData->itemStates->encodedSSC;
     $media->$videoField->validfrom_ssc = $videoData->itemStates->validfrom_ssc;
@@ -151,14 +147,24 @@ class Omnia extends ControllerBase {
     $media->$videoField->isBlocked = $videoData->itemStates->isBlocked;
     $media->$videoField->encodedTHUMBS = $videoData->itemStates->encodedTHUMBS;
 
+    // copy title to label field
     $media->$labelKey = $media->$videoField->title;
+
+    // update taxonomy references
+    if($channelField) {
+      $media->$channelField = $media->$videoField->channel_id;
+    }
+    if($actorField) {
+      $media->$actorField = explode(',', $media->$videoField->actors_ids);
+    }
   }
 
   /**
    * Retrieves configured channel taxonomy
    */
   protected function channelTaxonomy() {
-    return $this->config('nexx_integration.settings')->get('channel_vocabulary');
+    return $this->config('nexx_integration.settings')
+      ->get('channel_vocabulary');
   }
 
   /**
@@ -198,33 +204,54 @@ class Omnia extends ControllerBase {
 
   protected function videoFieldName() {
     $entity_type_id = 'media';
-    $mediaBundleInfo = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
+    $videoBundle = $this->config('nexx_integration.settings')
+      ->get('video_bundle');
 
-    foreach(array_keys($mediaBundleInfo) as $bundle){
-      $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
-      foreach($fieldDefinitions as $fieldname => $fieldDefinition){
-        if($fieldDefinition->getType() ===  'nexx_video_data') {
-          $videoField = $fieldname;
-          break 2;
-        }
+    $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $videoBundle);
+    foreach ($fieldDefinitions as $fieldname => $fieldDefinition) {
+      if ($fieldDefinition->getType() === 'nexx_video_data') {
+        $videoField = $fieldname;
+        break;
       }
     }
 
 
-    if(empty($videoField)) {
+    if (empty($videoField)) {
       throw new \Exception('No video data field defined');
     }
 
     return $videoField;
   }
 
+  protected function taxonomyFieldName($target_bundle, EntityInterface $media) {
+    $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions($media->getEntityType()
+        ->id(), $media->bundle()
+      );
+
+    foreach ($fieldDefinitions as $currentFieldName => $fieldDefinition) {
+      // find taxonomy term, reference for given bundle
+      if ($fieldDefinition->getType() === 'entity_reference' && $fieldDefinition->getFieldStorageDefinition()
+          ->getSetting('target_type') === 'taxonomy_term' && !empty($fieldDefinition->getSetting('handler_settings')['target_bundles'][$target_bundle])
+      ) {
+        $fieldName = $currentFieldName;
+        break;
+      }
+    }
+    if (empty($fieldName)) {
+      throw new \Exception("No $target_bundle referencing field found");
+    }
+
+    return $fieldName;
+  }
+
+
   protected function termId($taxonomy, $name) {
     return array_shift($this->entityTypeManager()
       ->getStorage('taxonomy_term')
       ->loadByProperties([
-        'vid' => $taxonomy,
-        'name' => trim($name)
-      ]
+          'vid' => $taxonomy,
+          'name' => trim($name)
+        ]
       )
     );
   }

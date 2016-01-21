@@ -34,7 +34,6 @@ class NexxVideoData extends FieldItemBase {
       'columns' => array(
         'item_id' => array(
           'type' => 'int',
-          'not null' => TRUE,
         ),
         'title' => array(
           'type' => 'varchar',
@@ -162,8 +161,7 @@ class NexxVideoData extends FieldItemBase {
     FieldStorageDefinitionInterface $field_definition
   ) {
     $properties['item_id'] = DataDefinition::create('integer')
-      ->setLabel(t('Nexx item ID'))
-      ->setRequired(TRUE);
+      ->setLabel(t('Nexx item ID'));
     $properties['title'] = DataDefinition::create('string')
       ->setLabel(t('Title'));
     $properties['subtitle'] = DataDefinition::create('string')
