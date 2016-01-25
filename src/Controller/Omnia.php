@@ -2,13 +2,13 @@
 
 namespace Drupal\nexx_integration\Controller;
 
-use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Omnia extends ControllerBase {
   /**
@@ -63,7 +63,7 @@ class Omnia extends ControllerBase {
    * Endpoint for video creation / update
    */
   public function video(Request $request) {
-    $response = new AjaxResponse();
+    $response = new JsonResponse();
     $content = $request->getContent();
     $query = $this->mediaEntityStorage()->getQuery();
 
@@ -88,7 +88,7 @@ class Omnia extends ControllerBase {
     $this->mapData($media, $videoData);
     $media->save();
 
-    $response->setContent();
+    $response->setdata(['refnr' => $videoData->itemID, 'value' => $media->id()]);
     return $response;
   }
 
@@ -151,10 +151,10 @@ class Omnia extends ControllerBase {
     $media->$labelKey = $media->$videoField->title;
 
     // update taxonomy references
-    if($channelField) {
+    if ($channelField) {
       $media->$channelField = $media->$videoField->channel_id;
     }
-    if($actorField) {
+    if ($actorField) {
       $media->$actorField = explode(',', $media->$videoField->actors_ids);
     }
   }
@@ -215,7 +215,6 @@ class Omnia extends ControllerBase {
       }
     }
 
-
     if (empty($videoField)) {
       throw new \Exception('No video data field defined');
     }
@@ -225,8 +224,8 @@ class Omnia extends ControllerBase {
 
   protected function taxonomyFieldName($target_bundle, EntityInterface $media) {
     $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions($media->getEntityType()
-        ->id(), $media->bundle()
-      );
+      ->id(), $media->bundle()
+    );
 
     foreach ($fieldDefinitions as $currentFieldName => $fieldDefinition) {
       // find taxonomy term, reference for given bundle
