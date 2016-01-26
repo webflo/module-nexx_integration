@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -65,11 +66,37 @@ class Omnia extends ControllerBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.bundle.info'),
-      $container->get('entity_field.manager'),
-      $container->get('logger.factory')->get('nexx_integration')
+    return new static($container->get('entity_type.bundle.info'), $container->get('entity_field.manager'), $container->get('logger.factory')
+      ->get('nexx_integration')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsForm(MediaBundleInterface $bundle) {
+    $form = array();
+
+    $vocabulary = $this->entityTypeManager->getDefinition('taxonomy_term');
+    $default_bundle = !empty($values['type_settings']['channel_vocabulary']) ? $values['type_settings']['channel_vocabulary'] : $this->configuration['channel_vocabulary'];
+    $form['channel_vocabulary'] = [
+      '#type' => 'select',
+      '#title' => 'Channel ' . $vocabulary->getBundleLabel() ?: $this->t('Bundles'),
+      '#options' => $this->getEntityBundleOptions($vocabulary),
+      '#default_value' => $default_bundle,
+      '#description' => $this->t('The taxonomy which is used for videos. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
+    ];
+
+    $bundle = !empty($values['type_settings']['actor_vocabulary']) ? $values['type_settings']['actor_vocabulary'] : $this->configuration['actor_vocabulary'];
+    $form['actor_vocabulary'] = [
+      '#type' => 'select',
+      '#title' => 'Actor ' . $vocabulary->getBundleLabel() ?: $this->t('Bundles'),
+      '#options' => $this->getEntityBundleOptions($vocabulary),
+      '#default_value' => $bundle,
+      '#description' => $this->t('The taxonomy which is used for actors. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
+    ];
+
+    return $form;
   }
 
   /**
@@ -89,7 +116,11 @@ class Omnia extends ControllerBase {
     }
 
     $this->logger->info("@content", array('@content' => $content));
-    $this->logger->info('Incoming video "@title" (nexx id: @id)', array('@title' => $videoData->itemData->title, '@id' => $videoData->itemID));
+    $this->logger->info('Incoming video "@title" (nexx id: @id)', array(
+      '@title' => $videoData->itemData->title,
+      '@id' => $videoData->itemID
+    )
+    );
 
     $video_field = $this->videoFieldName();
     $ids = $query->condition($video_field . '.item_id', $videoData->itemID)
@@ -103,8 +134,16 @@ class Omnia extends ControllerBase {
     }
     $this->mapData($media, $videoData);
     $media->save();
-    $this->logger->info('Updated video "@title" (drupal id: @id)', array('@title' => $videoData->itemData->title, '@id' => $media->id()));
-    $response->setdata(['refnr' => $videoData->itemID, 'value' => $media->id()]);
+    $this->logger->info('Updated video "@title" (drupal id: @id)', array(
+      '@title' => $videoData->itemData->title,
+      '@id' => $media->id()
+    )
+    );
+    $response->setdata([
+      'refnr' => $videoData->itemID,
+      'value' => $media->id()
+    ]
+    );
     return $response;
   }
 
@@ -269,5 +308,26 @@ class Omnia extends ControllerBase {
         ]
       )
     );
+  }
+
+  /**
+   * Builds a list of entity type bundle options.
+   *
+   * Configuration entity types without a view builder are filtered out while
+   * all other entity types are kept.
+   *
+   * @return array
+   *   An array of bundle labels, keyed by bundle name.
+   */
+  protected function getEntityBundleOptions(EntityTypeInterface $entity_type) {
+    $bundle_options = array();
+    // If the entity has bundles, allow option to restrict to bundle(s).
+    if ($entity_type->hasKey('bundle')) {
+      foreach ($this->entityManager->getBundleInfo($entity_type->id()) as $bundle_id => $bundle_info) {
+        $bundle_options[$bundle_id] = $bundle_info['label'];
+      }
+      natsort($bundle_options);
+    }
+    return $bundle_options;
   }
 }
