@@ -77,6 +77,9 @@ class Omnia extends ControllerBase {
 
     \Drupal::logger('nexx_integration')->notice(print_r($videoData, true));
 
+
+
+
     $video_field = $this->videoFieldName();
     $ids = $query->condition($video_field . '.item_id', $videoData->itemID)
       ->execute();
@@ -121,42 +124,45 @@ class Omnia extends ControllerBase {
     $videoField = $this->videoFieldName();
     $labelKey = $entityType->getKey('label');
 
-    $media->$videoField->item_id = $videoData->itemID;
-    $media->$videoField->title = $videoData->itemData->title;
-    $media->$videoField->alttitle = $videoData->itemData->alttitle;
-    $media->$videoField->subtitle = $videoData->itemData->subtitle;
-    $media->$videoField->teaser = $videoData->itemData->teaser;
-    $media->$videoField->description = $videoData->itemData->description;
-    $media->$videoField->altdescription = $videoData->itemData->altdescription;
-    $media->$videoField->uploaded = $videoData->itemData->uploaded;
-    $media->$videoField->channel_id = $videoData->itemData->channel_id;
-    $media->$videoField->actors_ids = $videoData->itemData->actors_ids;
-    $media->$videoField->isSSC = $videoData->itemStates->isSSC;
-    $media->$videoField->encodedSSC = $videoData->itemStates->encodedSSC;
-    $media->$videoField->validfrom_ssc = $videoData->itemStates->validfrom_ssc;
-    $media->$videoField->validto_ssc = $videoData->itemStates->validto_ssc;
-    $media->$videoField->encodedHTML5 = $videoData->itemStates->encodedHTML5;
-    $media->$videoField->isMOBILE = $videoData->itemStates->isMOBILE;
-    $media->$videoField->encodedMOBILE = $videoData->itemStates->encodedMOBILE;
-    $media->$videoField->validfrom_mobile = $videoData->itemStates->validfrom_mobile;
-    $media->$videoField->validto_mobile = $videoData->itemStates->validto_mobile;
-    $media->$videoField->isHYVE = $videoData->itemStates->isHYVE;
-    $media->$videoField->encodedHYVE = $videoData->itemStates->encodedHYVE;
-    $media->$videoField->validfrom_hyve = $videoData->itemStates->validfrom_hyve;
-    $media->$videoField->validto_hyve = $videoData->itemStates->validto_hyve;
-    $media->$videoField->active = $videoData->itemStates->active;
-    $media->$videoField->isDeleted = $videoData->itemStates->isDeleted;
-    $media->$videoField->isBlocked = $videoData->itemStates->isBlocked;
-    $media->$videoField->encodedTHUMBS = $videoData->itemStates->encodedTHUMBS;
+    $vdata = [itemID] => 64192 [itemReference] => [itemMime] => video [clientID] => 612 [triggerReason] => metadata [triggerTime] => 1453808855 [sendingTime] => 1453808882 [triggeredInSession] => 114537998797610636 [triggeredByUser] => 119574 [itemData] => stdClass Object ( [ID] => 64192 [hash] => VXWQ64192ZN3V08 [connector] => 612 [title] => Test video [subtitle] => [teaser] => [orderhint] => [description] => [category] => [channel] => [videotype] => movie [genre] => [isPay] => 0 [uploaded] => 1453800627 [tags] => [lat] => 0 [lng] => 0 [actors] => [voices] => [director] => [producer] => [cameraman] => [scriptby] => [musicby] => [conductor] => [studio] => 0 [year] => 2016 [country] => [copyright] => [imagecopyright] => [awards] => [ages] => 0 [hasTrailerID] => 0 [isReferenceOf] => 0 [linkedAlbum] => 0 [linkedFile] => 0 [language] => deutsch [encodedTHUMBS] => 1 [rating] => 3 [ratingcount] => [thumb] => http://az731961.vo.msecnd.net/201601/EFI264192P09DLOxL.jpg [thumb_ssl] => https://az731961.vo.msecnd.net/201601/EFI264192P09DLOxL.jpg [thumb_alt] => http://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [thumb_alt_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [thumb_action] => http://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [thumb_action_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [runtime] => 00:00:05 [hasSubtitles] => 0 [userid] => 0 [orientation] => landscape [isTrailerOf] => 0 [thumb_animatedgif] => http://az731961.vo.msecnd.net/global/nodata/nodata.jpg [thumb_animatedgif_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodata.jpg [thumb_back] => http://az731961.vo.msecnd.net/global/nodata/nodata.jpg [thumb_back_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodata.jpg [categoryname] => [channel_id] => 0 [commentcount] => [likecount] => [studioname] => [currency] => EUR [discount] => 0 [price] => 0 [originalprice] => 0 [genre_ids] => ) [itemStates] => stdClass Object ( [isSSC] => 1 [encodedSSC] => 1 [validfrom_ssc] => 0 [validto_ssc] => 0 [encodedHTML5] => 1 [isMOBILE] => 1 [encodedMOBILE] => 1 [validfrom_mobile] => 0 [validto_mobile] => 0 [active] => 1 [isDeleted] => 0 [isBlocked] => 0 [encodedTHUMBS] => 1 [validto_image] => 0 [autodelete] => 0000-00-00 [georestriction] => [geoexcludes] => [ages] => 0 ) )
+
+
+    $media->$videoField->item_id = !empty($videoData->itemID) ? $videoData->itemID : 0;
+    $media->$videoField->title = !empty($videoData->itemData->title) ? $videoData->itemData->title : '';
+    $media->$videoField->alttitle = !empty($videoData->itemData->alttitle) ? $videoData->itemData->alttitle : '';
+    $media->$videoField->subtitle = !empty($videoData->itemData->subtitle) ? $videoData->itemData->subtitle : '';
+    $media->$videoField->teaser = !empty($videoData->itemData->teaser) ? $videoData->itemData->teaser : '';
+    $media->$videoField->description = !empty($videoData->itemData->description) ? $videoData->itemData->description : '';
+    $media->$videoField->altdescription = !empty($videoData->itemData->altdescription) ? $videoData->itemData->altdescription : '';
+    $media->$videoField->uploaded = !empty($videoData->itemData->uploaded) ? $videoData->itemData->uploaded : '';
+    $media->$videoField->channel_id = !empty($videoData->itemData->channel_id) ? $videoData->itemData->channel_id : '';
+    $media->$videoField->actors_ids = !empty($videoData->itemData->actors_ids) ? $videoData->itemData->actors_ids : '';
+    $media->$videoField->isSSC = !empty($videoData->itemStates->isSSC) ? $videoData->itemStates->isSSC : '';
+    $media->$videoField->encodedSSC = !empty($videoData->itemStates->encodedSSC) ? $videoData->itemStates->encodedSSC : '';
+    $media->$videoField->validfrom_ssc = !empty($videoData->itemStates->validfrom_ssc) ? $videoData->itemStates->validfrom_ssc : '';
+    $media->$videoField->validto_ssc = !empty($videoData->itemStates->validto_ssc) ? $videoData->itemStates->validto_ssc : '';
+    $media->$videoField->encodedHTML5 = !empty($videoData->itemStates->encodedHTML5) ? $videoData->itemStates->encodedHTML5 : '';
+    $media->$videoField->isMOBILE = !empty($videoData->itemStates->isMOBILE) ? $videoData->itemStates->isMOBILE : '';
+    $media->$videoField->encodedMOBILE = !empty($videoData->itemStates->encodedMOBILE) ? $videoData->itemStates->encodedMOBILE : '';
+    $media->$videoField->validfrom_mobile = !empty($videoData->itemStates->validfrom_mobile) ? $videoData->itemStates->validfrom_mobile : '';
+    $media->$videoField->validto_mobile = !empty($videoData->itemStates->validto_mobile) ? $videoData->itemStates->validto_mobile : '';
+    $media->$videoField->isHYVE = !empty($videoData->itemStates->isHYVE) ? $videoData->itemStates->isHYVE : '';
+    $media->$videoField->encodedHYVE = !empty($videoData->itemStates->encodedHYVE) ? $videoData->itemStates->encodedHYVE : '';
+    $media->$videoField->validfrom_hyve = !empty($videoData->itemStates->validfrom_hyve) ? $videoData->itemStates->validfrom_hyve : '';
+    $media->$videoField->validto_hyve = !empty($videoData->itemStates->validto_hyve) ? $videoData->itemStates->validto_hyve : '';
+    $media->$videoField->active = !empty($videoData->itemStates->active) ? $videoData->itemStates->active : '';
+    $media->$videoField->isDeleted = !empty($videoData->itemStates->isDeleted) ? $videoData->itemStates->isDeleted : '';
+    $media->$videoField->isBlocked = !empty($videoData->itemStates->isBlocked) ? $videoData->itemStates->isBlocked : '';
+    $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : '';
 
     // copy title to label field
     $media->$labelKey = $media->$videoField->title;
 
     // update taxonomy references
-    if ($channelField) {
+    if ($channelField && !empty($media->$videoField->channel_id)) {
       $media->$channelField = $media->$videoField->channel_id;
     }
-    if ($actorField) {
+    if ($actorField && !empty($media->$videoField->actors_ids)) {
       $media->$actorField = explode(',', $media->$videoField->actors_ids);
     }
   }
