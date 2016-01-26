@@ -88,7 +88,7 @@ class Omnia extends ControllerBase {
       throw new \Exception('ItemID missing');
     }
 
-    $this->logger->info($content);
+    $this->logger->info("@content", array('@content' => $content));
     $this->logger->info('Incoming video "@title" (nexx id: @id)', array('@title' => $videoData->itemData->title, '@id' => $videoData->itemID));
 
     $video_field = $this->videoFieldName();
@@ -143,7 +143,7 @@ class Omnia extends ControllerBase {
     $media->$videoField->description = !empty($videoData->itemData->description) ? $videoData->itemData->description : '';
     $media->$videoField->altdescription = !empty($videoData->itemData->altdescription) ? $videoData->itemData->altdescription : '';
     $media->$videoField->uploaded = !empty($videoData->itemData->uploaded) ? $videoData->itemData->uploaded : '';
-    $media->$videoField->channel_id = !empty($videoData->itemData->channel_id) ? $videoData->itemData->channel_id : '';
+    $media->$videoField->channel_id = !empty($videoData->itemData->channel_id) ? $videoData->itemData->channel_id : 0;
     $media->$videoField->actors_ids = !empty($videoData->itemData->actors_ids) ? $videoData->itemData->actors_ids : '';
     $media->$videoField->isSSC = !empty($videoData->itemStates->isSSC) ? $videoData->itemStates->isSSC : 0;
     $media->$videoField->encodedSSC = !empty($videoData->itemStates->encodedSSC) ? $videoData->itemStates->encodedSSC : 0;
