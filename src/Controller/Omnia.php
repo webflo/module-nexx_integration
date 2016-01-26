@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -36,26 +37,38 @@ class Omnia extends ControllerBase {
    */
   protected $entityFieldManager;
 
+  /**
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
 
   /**
    *
    * @param EntityTypeBundleInfoInterface $entity_type_bundle_info
-   *    The date formatter service.
+   *  The date formatter service.
    * @param EntityFieldManagerInterface $entity_field_manager
+   *  The entity field manager
+   * @param LoggerInterface $logger
+   *  The logger service
    */
   public function __construct(
     EntityTypeBundleInfoInterface $entity_type_bundle_info,
-    EntityFieldManagerInterface $entity_field_manager
+    EntityFieldManagerInterface $entity_field_manager,
+    LoggerInterface $logger
   ) {
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->entityFieldManager = $entity_field_manager;
+    $this->logger = $logger;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('entity_type.bundle.info'), $container->get('entity_field.manager')
+    return new static(
+      $container->get('entity_type.bundle.info'),
+      $container->get('entity_field.manager'),
+      $container->get('logger.factory')->get('nexx_integration')
     );
   }
 
@@ -75,10 +88,7 @@ class Omnia extends ControllerBase {
       throw new \Exception('ItemID missing');
     }
 
-    \Drupal::logger('nexx_integration')->notice(print_r($videoData, true));
-
-
-
+    $this->logger->info('Incoming video "@title" (nexx id: @id)', array('@title' => $videoData->itemData->title, '@id' => $videoData->itemID));
 
     $video_field = $this->videoFieldName();
     $ids = $query->condition($video_field . '.item_id', $videoData->itemID)
@@ -92,7 +102,7 @@ class Omnia extends ControllerBase {
     }
     $this->mapData($media, $videoData);
     $media->save();
-
+    $this->logger->info('Updated video "@title" (drupal id: @id)', array('@title' => $videoData->itemData->title, '@id' => $media->id()));
     $response->setdata(['refnr' => $videoData->itemID, 'value' => $media->id()]);
     return $response;
   }
@@ -124,9 +134,6 @@ class Omnia extends ControllerBase {
     $videoField = $this->videoFieldName();
     $labelKey = $entityType->getKey('label');
 
-    $vdata = [itemID] => 64192 [itemReference] => [itemMime] => video [clientID] => 612 [triggerReason] => metadata [triggerTime] => 1453808855 [sendingTime] => 1453808882 [triggeredInSession] => 114537998797610636 [triggeredByUser] => 119574 [itemData] => stdClass Object ( [ID] => 64192 [hash] => VXWQ64192ZN3V08 [connector] => 612 [title] => Test video [subtitle] => [teaser] => [orderhint] => [description] => [category] => [channel] => [videotype] => movie [genre] => [isPay] => 0 [uploaded] => 1453800627 [tags] => [lat] => 0 [lng] => 0 [actors] => [voices] => [director] => [producer] => [cameraman] => [scriptby] => [musicby] => [conductor] => [studio] => 0 [year] => 2016 [country] => [copyright] => [imagecopyright] => [awards] => [ages] => 0 [hasTrailerID] => 0 [isReferenceOf] => 0 [linkedAlbum] => 0 [linkedFile] => 0 [language] => deutsch [encodedTHUMBS] => 1 [rating] => 3 [ratingcount] => [thumb] => http://az731961.vo.msecnd.net/201601/EFI264192P09DLOxL.jpg [thumb_ssl] => https://az731961.vo.msecnd.net/201601/EFI264192P09DLOxL.jpg [thumb_alt] => http://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [thumb_alt_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [thumb_action] => http://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [thumb_action_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodataxL.jpg [runtime] => 00:00:05 [hasSubtitles] => 0 [userid] => 0 [orientation] => landscape [isTrailerOf] => 0 [thumb_animatedgif] => http://az731961.vo.msecnd.net/global/nodata/nodata.jpg [thumb_animatedgif_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodata.jpg [thumb_back] => http://az731961.vo.msecnd.net/global/nodata/nodata.jpg [thumb_back_ssl] => https://az731961.vo.msecnd.net/global/nodata/nodata.jpg [categoryname] => [channel_id] => 0 [commentcount] => [likecount] => [studioname] => [currency] => EUR [discount] => 0 [price] => 0 [originalprice] => 0 [genre_ids] => ) [itemStates] => stdClass Object ( [isSSC] => 1 [encodedSSC] => 1 [validfrom_ssc] => 0 [validto_ssc] => 0 [encodedHTML5] => 1 [isMOBILE] => 1 [encodedMOBILE] => 1 [validfrom_mobile] => 0 [validto_mobile] => 0 [active] => 1 [isDeleted] => 0 [isBlocked] => 0 [encodedTHUMBS] => 1 [validto_image] => 0 [autodelete] => 0000-00-00 [georestriction] => [geoexcludes] => [ages] => 0 ) )
-
-
     $media->$videoField->item_id = !empty($videoData->itemID) ? $videoData->itemID : 0;
     $media->$videoField->title = !empty($videoData->itemData->title) ? $videoData->itemData->title : '';
     $media->$videoField->alttitle = !empty($videoData->itemData->alttitle) ? $videoData->itemData->alttitle : '';
@@ -137,23 +144,23 @@ class Omnia extends ControllerBase {
     $media->$videoField->uploaded = !empty($videoData->itemData->uploaded) ? $videoData->itemData->uploaded : '';
     $media->$videoField->channel_id = !empty($videoData->itemData->channel_id) ? $videoData->itemData->channel_id : '';
     $media->$videoField->actors_ids = !empty($videoData->itemData->actors_ids) ? $videoData->itemData->actors_ids : '';
-    $media->$videoField->isSSC = !empty($videoData->itemStates->isSSC) ? $videoData->itemStates->isSSC : '';
-    $media->$videoField->encodedSSC = !empty($videoData->itemStates->encodedSSC) ? $videoData->itemStates->encodedSSC : '';
-    $media->$videoField->validfrom_ssc = !empty($videoData->itemStates->validfrom_ssc) ? $videoData->itemStates->validfrom_ssc : '';
-    $media->$videoField->validto_ssc = !empty($videoData->itemStates->validto_ssc) ? $videoData->itemStates->validto_ssc : '';
-    $media->$videoField->encodedHTML5 = !empty($videoData->itemStates->encodedHTML5) ? $videoData->itemStates->encodedHTML5 : '';
-    $media->$videoField->isMOBILE = !empty($videoData->itemStates->isMOBILE) ? $videoData->itemStates->isMOBILE : '';
-    $media->$videoField->encodedMOBILE = !empty($videoData->itemStates->encodedMOBILE) ? $videoData->itemStates->encodedMOBILE : '';
-    $media->$videoField->validfrom_mobile = !empty($videoData->itemStates->validfrom_mobile) ? $videoData->itemStates->validfrom_mobile : '';
-    $media->$videoField->validto_mobile = !empty($videoData->itemStates->validto_mobile) ? $videoData->itemStates->validto_mobile : '';
-    $media->$videoField->isHYVE = !empty($videoData->itemStates->isHYVE) ? $videoData->itemStates->isHYVE : '';
-    $media->$videoField->encodedHYVE = !empty($videoData->itemStates->encodedHYVE) ? $videoData->itemStates->encodedHYVE : '';
-    $media->$videoField->validfrom_hyve = !empty($videoData->itemStates->validfrom_hyve) ? $videoData->itemStates->validfrom_hyve : '';
-    $media->$videoField->validto_hyve = !empty($videoData->itemStates->validto_hyve) ? $videoData->itemStates->validto_hyve : '';
-    $media->$videoField->active = !empty($videoData->itemStates->active) ? $videoData->itemStates->active : '';
-    $media->$videoField->isDeleted = !empty($videoData->itemStates->isDeleted) ? $videoData->itemStates->isDeleted : '';
-    $media->$videoField->isBlocked = !empty($videoData->itemStates->isBlocked) ? $videoData->itemStates->isBlocked : '';
-    $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : '';
+    $media->$videoField->isSSC = !empty($videoData->itemStates->isSSC) ? $videoData->itemStates->isSSC : 0;
+    $media->$videoField->encodedSSC = !empty($videoData->itemStates->encodedSSC) ? $videoData->itemStates->encodedSSC : 0;
+    $media->$videoField->validfrom_ssc = !empty($videoData->itemStates->validfrom_ssc) ? $videoData->itemStates->validfrom_ssc : 0;
+    $media->$videoField->validto_ssc = !empty($videoData->itemStates->validto_ssc) ? $videoData->itemStates->validto_ssc : 0;
+    $media->$videoField->encodedHTML5 = !empty($videoData->itemStates->encodedHTML5) ? $videoData->itemStates->encodedHTML5 : 0;
+    $media->$videoField->isMOBILE = !empty($videoData->itemStates->isMOBILE) ? $videoData->itemStates->isMOBILE : 0;
+    $media->$videoField->encodedMOBILE = !empty($videoData->itemStates->encodedMOBILE) ? $videoData->itemStates->encodedMOBILE : 0;
+    $media->$videoField->validfrom_mobile = !empty($videoData->itemStates->validfrom_mobile) ? $videoData->itemStates->validfrom_mobile : 0;
+    $media->$videoField->validto_mobile = !empty($videoData->itemStates->validto_mobile) ? $videoData->itemStates->validto_mobile : 0;
+    $media->$videoField->isHYVE = !empty($videoData->itemStates->isHYVE) ? $videoData->itemStates->isHYVE : 0;
+    $media->$videoField->encodedHYVE = !empty($videoData->itemStates->encodedHYVE) ? $videoData->itemStates->encodedHYVE : 0;
+    $media->$videoField->validfrom_hyve = !empty($videoData->itemStates->validfrom_hyve) ? $videoData->itemStates->validfrom_hyve : 0;
+    $media->$videoField->validto_hyve = !empty($videoData->itemStates->validto_hyve) ? $videoData->itemStates->validto_hyve : 0;
+    $media->$videoField->active = !empty($videoData->itemStates->active) ? $videoData->itemStates->active : 0;
+    $media->$videoField->isDeleted = !empty($videoData->itemStates->isDeleted) ? $videoData->itemStates->isDeleted : 0;
+    $media->$videoField->isBlocked = !empty($videoData->itemStates->isBlocked) ? $videoData->itemStates->isBlocked : 0;
+    $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : 0;
 
     // copy title to label field
     $media->$labelKey = $media->$videoField->title;
