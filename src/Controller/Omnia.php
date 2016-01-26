@@ -75,6 +75,8 @@ class Omnia extends ControllerBase {
       throw new \Exception('ItemID missing');
     }
 
+    \Drupal::logger('nexx_integration')->notice(print_r($videoData, true));
+
     $video_field = $this->videoFieldName();
     $ids = $query->condition($video_field . '.item_id', $videoData->itemID)
       ->execute();
