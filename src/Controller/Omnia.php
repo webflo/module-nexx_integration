@@ -4,9 +4,9 @@ namespace Drupal\nexx_integration\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Utility\Token;
+use Drupal\media_entity\MediaInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,6 +44,11 @@ class Omnia extends ControllerBase {
   protected $logger;
 
   /**
+   * @var \Drupal\Core\Utility\Token;
+   */
+  protected $token;
+
+  /**
    *
    * @param EntityTypeBundleInfoInterface $entity_type_bundle_info
    *  The date formatter service.
@@ -51,15 +56,19 @@ class Omnia extends ControllerBase {
    *  The entity field manager
    * @param LoggerInterface $logger
    *  The logger service
+   * @param Token $token
+   *  Token service
    */
   public function __construct(
     EntityTypeBundleInfoInterface $entity_type_bundle_info,
     EntityFieldManagerInterface $entity_field_manager,
-    LoggerInterface $logger
+    LoggerInterface $logger,
+    Token $token
   ) {
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->entityFieldManager = $entity_field_manager;
     $this->logger = $logger;
+    $this->token = $token;
   }
 
   /**
@@ -67,36 +76,9 @@ class Omnia extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static($container->get('entity_type.bundle.info'), $container->get('entity_field.manager'), $container->get('logger.factory')
-      ->get('nexx_integration')
+      ->get('nexx_integration'),
+      $container->get('token')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function settingsForm(MediaBundleInterface $bundle) {
-    $form = array();
-
-    $vocabulary = $this->entityTypeManager->getDefinition('taxonomy_term');
-    $default_bundle = !empty($values['type_settings']['channel_vocabulary']) ? $values['type_settings']['channel_vocabulary'] : $this->configuration['channel_vocabulary'];
-    $form['channel_vocabulary'] = [
-      '#type' => 'select',
-      '#title' => 'Channel ' . $vocabulary->getBundleLabel() ?: $this->t('Bundles'),
-      '#options' => $this->getEntityBundleOptions($vocabulary),
-      '#default_value' => $default_bundle,
-      '#description' => $this->t('The taxonomy which is used for videos. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
-    ];
-
-    $bundle = !empty($values['type_settings']['actor_vocabulary']) ? $values['type_settings']['actor_vocabulary'] : $this->configuration['actor_vocabulary'];
-    $form['actor_vocabulary'] = [
-      '#type' => 'select',
-      '#title' => 'Actor ' . $vocabulary->getBundleLabel() ?: $this->t('Bundles'),
-      '#options' => $this->getEntityBundleOptions($vocabulary),
-      '#default_value' => $bundle,
-      '#description' => $this->t('The taxonomy which is used for actors. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
-    ];
-
-    return $form;
   }
 
   /**
@@ -117,9 +99,9 @@ class Omnia extends ControllerBase {
 
     $this->logger->info("@content", array('@content' => $content));
     $this->logger->info('Incoming video "@title" (nexx id: @id)', array(
-      '@title' => $videoData->itemData->title,
-      '@id' => $videoData->itemID
-    )
+        '@title' => $videoData->itemData->title,
+        '@id' => $videoData->itemID
+      )
     );
 
     $video_field = $this->videoFieldName();
@@ -135,14 +117,14 @@ class Omnia extends ControllerBase {
     $this->mapData($media, $videoData);
     $media->save();
     $this->logger->info('Updated video "@title" (drupal id: @id)', array(
-      '@title' => $videoData->itemData->title,
-      '@id' => $media->id()
-    )
+        '@title' => $videoData->itemData->title,
+        '@id' => $media->id()
+      )
     );
     $response->setdata([
-      'refnr' => $videoData->itemID,
-      'value' => $media->id()
-    ]
+        'refnr' => $videoData->itemID,
+        'value' => $media->id()
+      ]
     );
     return $response;
   }
@@ -163,15 +145,10 @@ class Omnia extends ControllerBase {
     return $this->mediaEntity;
   }
 
-  protected function mapData(EntityInterface $media, $videoData) {
+  protected function mapData(MediaInterface $media, $videoData) {
     $entityType = $this->mediaEntityDefinition();
-    $channel_taxonomy = $this->channelTaxonomy();
-    $actor_taxonomy = $this->actorTaxonomy();
-
-    $channelField = $this->taxonomyFieldName($channel_taxonomy, $media);
-    $actorField = $this->taxonomyFieldName($actor_taxonomy, $media);
-
     $videoField = $this->videoFieldName();
+
     $labelKey = $entityType->getKey('label');
 
     $media->$videoField->item_id = !empty($videoData->itemID) ? $videoData->itemID : 0;
@@ -202,8 +179,14 @@ class Omnia extends ControllerBase {
     $media->$videoField->isBlocked = !empty($videoData->itemStates->isBlocked) ? $videoData->itemStates->isBlocked : 0;
     $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : 0;
 
+
     // copy title to label field
     $media->$labelKey = $media->$videoField->title;
+
+    $media_config = $media->getType()->getConfiguration();
+    $channelField = $media_config['channel_field'];
+    $actorField = $media_config['actor_field'];
+    $teaserImageField = $media_config['teaser_image_field'];
 
     // update taxonomy references
     if ($channelField && !empty($media->$videoField->channel_id)) {
@@ -212,22 +195,54 @@ class Omnia extends ControllerBase {
     if ($actorField && !empty($media->$videoField->actors_ids)) {
       $media->$actorField = explode(',', $media->$videoField->actors_ids);
     }
+    if ($teaserImageField && !empty($media->$videoField->thumb)) {
+      $this->mapTeaserImages($media, $teaserImageField, $videoData);
+    }
   }
 
   /**
-   * Retrieves configured channel taxonomy
+   * @param $media
+   * @param $teaserImageField
+   * @param $videoData
    */
-  protected function channelTaxonomy() {
-    return $this->config('nexx_integration.settings')
-      ->get('channel_vocabulary');
+  protected function mapTeaserImages($media, $teaserImageField, $videoData) {
+    $images_field = $media->$teaserImageField;
+    $images_field_target_type = $images_field->getSetting('target_type');
+
+    /**
+     * TODO: there must be a better way to get this information then creating a dummy object
+     */
+    $images_field_target_bundle = array_shift($images_field->getSetting('handler_settings')['target_bundles']);
+    $storage = $this->entityTypeManager()->getStorage($images_field_target_type);
+    $thumbnail_entity = $storage->create(['bundle' => $images_field_target_bundle]);
+    $thumbnail_entity->name = $media->label();
+    $updated_thumbnail_entity = FALSE;
+
+    if($thumb_uri = $videoData->itemData->thumb) {
+      // get configured source field from media entity type definition
+      $thumbnail_upload_field = $thumbnail_entity->getType()->getConfiguration()['source_field'];
+      // get field settings from this field
+      $thumbnail_upload_field_settings = $thumbnail_entity->getFieldDefinition($thumbnail_upload_field)->getSettings();
+      // use file directory and uri_scheme out of these settings to create destination directory for file upload
+      $upload_directory = $this->token->replace($thumbnail_upload_field_settings['file_directory']);
+      $destination_file =  $thumbnail_upload_field_settings['uri_scheme'] . '://' . $upload_directory . '/' . basename($thumb_uri);
+      $destination_directory = dirname($destination_file);
+      if ($destination_directory) {
+        // import file
+        file_prepare_directory($destination_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+        $thumbnail = file_save_data(file_get_contents($thumb_uri), $destination_file, FILE_EXISTS_REPLACE);
+        // add this file to thumbnail field of the nexx media entity
+        $thumbnail_entity->$thumbnail_upload_field->appendItem(['target_id' => $thumbnail->id(), 'alt' => $media->label()]);
+        $updated_thumbnail_entity = TRUE;
+      }
+    }
+    // if new thumbnails were found, safe the thumbnail media entity and link it to the nexx media entity
+    if($updated_thumbnail_entity) {
+      $thumbnail_entity->save();
+      $media->$teaserImageField = ['target_id' => $thumbnail_entity->id()];
+    }
   }
 
-  /**
-   * Retrieves configured actor taxonomy
-   */
-  protected function actorTaxonomy() {
-    return $this->config('nexx_integration.settings')->get('actor_vocabulary');
-  }
 
   /**
    * Retrieves the media entity storage.
@@ -277,28 +292,6 @@ class Omnia extends ControllerBase {
     return $videoField;
   }
 
-  protected function taxonomyFieldName($target_bundle, EntityInterface $media) {
-    $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions($media->getEntityType()
-      ->id(), $media->bundle()
-    );
-
-    foreach ($fieldDefinitions as $currentFieldName => $fieldDefinition) {
-      // find taxonomy term, reference for given bundle
-      if ($fieldDefinition->getType() === 'entity_reference' && $fieldDefinition->getFieldStorageDefinition()
-          ->getSetting('target_type') === 'taxonomy_term' && !empty($fieldDefinition->getSetting('handler_settings')['target_bundles'][$target_bundle])
-      ) {
-        $fieldName = $currentFieldName;
-        break;
-      }
-    }
-    if (empty($fieldName)) {
-      throw new \Exception("No $target_bundle referencing field found");
-    }
-
-    return $fieldName;
-  }
-
-
   protected function termId($taxonomy, $name) {
     return array_shift($this->entityTypeManager()
       ->getStorage('taxonomy_term')
@@ -308,26 +301,5 @@ class Omnia extends ControllerBase {
         ]
       )
     );
-  }
-
-  /**
-   * Builds a list of entity type bundle options.
-   *
-   * Configuration entity types without a view builder are filtered out while
-   * all other entity types are kept.
-   *
-   * @return array
-   *   An array of bundle labels, keyed by bundle name.
-   */
-  protected function getEntityBundleOptions(EntityTypeInterface $entity_type) {
-    $bundle_options = array();
-    // If the entity has bundles, allow option to restrict to bundle(s).
-    if ($entity_type->hasKey('bundle')) {
-      foreach ($this->entityManager->getBundleInfo($entity_type->id()) as $bundle_id => $bundle_info) {
-        $bundle_options[$bundle_id] = $bundle_info['label'];
-      }
-      natsort($bundle_options);
-    }
-    return $bundle_options;
   }
 }

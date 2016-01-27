@@ -69,7 +69,6 @@ class NexxVideoData extends FieldItemBase {
           'type' => 'varchar',
           'length' => 256,
         ),
-
         'isSSC' => array(
           'type' => 'int',
           'size' => 'tiny',
@@ -142,6 +141,10 @@ class NexxVideoData extends FieldItemBase {
           'type' => 'int',
           'size' => 'tiny',
           'unsigned' => 'true'
+        ),
+        'thumb' => array(
+          'type' => 'varchar',
+          'size' => '255',
         )
       ),
     );
@@ -164,6 +167,8 @@ class NexxVideoData extends FieldItemBase {
       ->setLabel(t('Nexx item ID'));
     $properties['title'] = DataDefinition::create('string')
       ->setLabel(t('Title'));
+    $properties['thumb'] = DataDefinition::create('string')
+      ->setLabel(t('Thumbnail URL'));
     $properties['subtitle'] = DataDefinition::create('string')
       ->setLabel(t('Subtitle'));
     $properties['alttitle'] = DataDefinition::create('string')
