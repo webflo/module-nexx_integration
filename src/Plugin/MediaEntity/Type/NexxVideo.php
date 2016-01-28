@@ -7,15 +7,10 @@
 
 namespace Drupal\nexx_integration\Plugin\MediaEntity\Type;
 
-use Drupal\Core\Config\Config;
-use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\EntityManager;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\media_entity\MediaBundleInterface;
 use Drupal\media_entity\MediaInterface;
 use Drupal\media_entity\MediaTypeBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 
 /**
@@ -46,16 +41,8 @@ class NexxVideo extends MediaTypeBase {
    * {@inheritdoc}
    */
   public function thumbnail(MediaInterface $media) {
-    $source_field = $this->configuration['source_field'];
-
-    /** @var \Drupal\file\FileInterface $file */
-    $file = $this->entityTypeManager->getStorage('file')->load($media->{$source_field}->target_id);
-
-    if (!$file) {
-      return $this->config->get('icon_base') . '/nexxvideo.png';
-    }
-
-    return $file->getFileUri();
+    // TODO: implement logic to fill this with the provided thumbnail
+    return $this->config->get('icon_base') . '/nexxvideo.png';
   }
   /**
    * {@inheritdoc}

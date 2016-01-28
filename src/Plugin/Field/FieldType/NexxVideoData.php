@@ -144,7 +144,7 @@ class NexxVideoData extends FieldItemBase {
         ),
         'thumb' => array(
           'type' => 'varchar',
-          'size' => '255',
+          'length' => 256,
         )
       ),
     );

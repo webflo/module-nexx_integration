@@ -179,7 +179,6 @@ class Omnia extends ControllerBase {
     $media->$videoField->isBlocked = !empty($videoData->itemStates->isBlocked) ? $videoData->itemStates->isBlocked : 0;
     $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : 0;
 
-
     // copy title to label field
     $media->$labelKey = $media->$videoField->title;
 
@@ -195,8 +194,13 @@ class Omnia extends ControllerBase {
     if ($actorField && !empty($media->$videoField->actors_ids)) {
       $media->$actorField = explode(',', $media->$videoField->actors_ids);
     }
-    if ($teaserImageField && !empty($media->$videoField->thumb)) {
-      $this->mapTeaserImages($media, $teaserImageField, $videoData);
+    if ($teaserImageField && $media->$videoField->thumb !== $videoData->itemData->thumb) {
+      if(!empty($videoData->itemData->thumb)) {
+        $media->$videoField->thumb = $videoData->itemData->thumb;
+        $this->mapTeaserImage($media, $teaserImageField, $videoData);
+      } else {
+        $media->$videoField->thumb = '';
+      }
     }
   }
 
@@ -205,7 +209,7 @@ class Omnia extends ControllerBase {
    * @param $teaserImageField
    * @param $videoData
    */
-  protected function mapTeaserImages($media, $teaserImageField, $videoData) {
+  protected function mapTeaserImage($media, $teaserImageField, $videoData) {
     $images_field = $media->$teaserImageField;
     $images_field_target_type = $images_field->getSetting('target_type');
 
