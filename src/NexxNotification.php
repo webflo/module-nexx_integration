@@ -11,6 +11,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Logger\LoggerChannelFactory;
+use Drupal\Component\Serialization\Json;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
@@ -153,9 +154,14 @@ class NexxNotification implements NexxNotificationInterface {
     $api_url = $this->config->get('nexx_api_url');
 
     try {
-      $options['body'] = $data;
+      $headers = array(
+        'Content-Type' => 'application/json'
+      );
+      $options = array(
+        'headers' => $headers,
+        'body' => Json::encode($data),
+      );
       $this->httpClient->post($api_url, $options);
-
       $this->logger->info("Successful notification. Streamtype '@streamtype', action '@action', refnr '@refnr', value '@value'", array(
         '@streamtype' => $streamtype,
         '@action' => $action,
