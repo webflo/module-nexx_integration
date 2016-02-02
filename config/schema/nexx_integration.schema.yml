@@ -5,9 +5,6 @@ nexx_integration.settings:
     video_bundle:
       type: string
       label: 'The bundle of the entity which is used.'
-    channel_vocabulary:
+    nexx_api_url:
       type: string
-      label: 'The vocabulary containing channel information.'
-    actor_vocabulary:
-      type: string
-      label: 'The vocabulary containing channel information.'
+      label:  'The URL to the nexx CRUD API.'

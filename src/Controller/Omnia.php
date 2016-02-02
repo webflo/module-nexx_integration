@@ -247,7 +247,6 @@ class Omnia extends ControllerBase {
     }
   }
 
-
   /**
    * Retrieves the media entity storage.
    *

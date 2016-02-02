@@ -69,6 +69,13 @@ class SettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
     $settings = $this->config('nexx_integration.settings');
 
+    $api_url = !empty($values['nexx_api_url']) ? $values['nexx_api_url'] : $settings->get('nexx_api_url');
+    $form['nexx_api_url'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('API Url'),
+      '#default_value' => $api_url,
+    ];
+
     // Add the embed type plugin settings.
     $form['type_settings'] = [
       '#type' => 'container',
@@ -100,6 +107,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('video_bundle', $values['type_settings']['video_bundle'])
       ->set('channel_vocabulary', $values['vocabulary_settings']['channel_vocabulary'])
       ->set('actor_vocabulary', $values['vocabulary_settings']['actor_vocabulary'])
+      ->set('nexx_api_url', $values['nexx_api_url'])
       ->save();
   }
 

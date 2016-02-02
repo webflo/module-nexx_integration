@@ -1,0 +1,26 @@
+<?php
+use Drupal\Core\Entity\EntityInterface;
+
+function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
+  $term_bundle = $term->bundle();
+  $container = \Drupal::getContainer();
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $nexx_notification = $container->get('nexx_integration.notification');
+
+  foreach ($container->get('entity_type.bundle.info')->getBundleInfo('media') as $bundle_id => $bundle_info) {
+    $bundle = $entity_type_manager->getStorage('media_bundle')->load($bundle_id);
+    if($bundle->getType()->getPluginId() === 'nexx_video') {
+      $configuration = $bundle->getType()->getConfiguration();
+      $field_definitions = $container->get('entity_field.manager')->getFieldDefinitions('media', 'nexx_video');
+      $channel_field_settings = $field_definitions[$configuration['channel_field']]->getSetting('handler_settings');
+      $actors_field_settings = $field_definitions[$configuration['actor_field']]->getSetting('handler_settings');
+
+      if(in_array($term_bundle, $channel_field_settings['target_bundles'])){
+        $nexx_notification->insert('channel', $term->id(), $term->label());
+      } else if (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
+        $nexx_notification->insert('actor', $term->id(), $term->label());
+      }
+      break;
+    }
+  }
+}

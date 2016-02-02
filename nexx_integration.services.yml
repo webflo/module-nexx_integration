@@ -1,4 +1,5 @@
 services:
   nexx_integration.notification:
     class: Drupal\nexx_integration\NexxNotification
-    arguments: ['@entity_type.manager', '@entity.query', '@config.factory']
+    arguments: ['@entity_type.manager', '@entity.query', '@config.factory', '@logger.factory', '@http_client']
+
