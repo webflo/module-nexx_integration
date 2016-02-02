@@ -153,10 +153,8 @@ class NexxNotification implements NexxNotificationInterface {
     $api_url = $this->config->get('nexx_api_url');
 
     try {
-      $request = $this->httpClient->post($api_url,array(
-        'content-type' => 'application/json'
-      ),array());
-      $request->setBody($data)->send();
+      $options['body'] = $data;
+      $this->httpClient->post($api_url, $options);
 
       $this->logger->info("Successful notification. Streamtype '@streamtype', action '@action', refnr '@refnr', value '@value'", array(
         '@streamtype' => $streamtype,
