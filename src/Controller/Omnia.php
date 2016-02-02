@@ -187,6 +187,12 @@ class Omnia extends ControllerBase {
     $actorField = $media_config['actor_field'];
     $teaserImageField = $media_config['teaser_image_field'];
 
+    $actors = explode(',', $media->$videoField->actors);
+    $actor_ids = [];
+    foreach($actors as $actor) {
+      $actor_ids[] = $this->termId('tags', $actor);
+    }
+
     // update taxonomy references
     if ($channelField && !empty($media->$videoField->channel_id)) {
       $media->$channelField = $media->$videoField->channel_id;
