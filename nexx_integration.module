@@ -2,6 +2,18 @@
 use Drupal\Core\Entity\EntityInterface;
 
 function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
+  nexx_integration_taxonomy_term_request($term, 'insert');
+}
+
+function nexx_integration_taxonomy_term_update(EntityInterface $term) {
+  nexx_integration_taxonomy_term_request($term, 'update');
+}
+
+function nexx_integration_taxonomy_term_delete(EntityInterface $term) {
+  nexx_integration_taxonomy_term_request($term, 'delete');
+}
+
+function nexx_integration_taxonomy_term_request(EntityInterface $term, $method) {
   $term_bundle = $term->bundle();
   $container = \Drupal::getContainer();
   $entity_type_manager = \Drupal::entityTypeManager();
@@ -16,9 +28,9 @@ function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
       $actors_field_settings = $field_definitions[$configuration['actor_field']]->getSetting('handler_settings');
 
       if(in_array($term_bundle, $channel_field_settings['target_bundles'])){
-        $nexx_notification->insert('channel', $term->id(), $term->label());
+        $nexx_notification->$method('channel', $term->id(), $term->label());
       } else if (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
-        $nexx_notification->insert('actor', $term->id(), $term->label());
+        $nexx_notification->$method('actor', $term->id(), $term->label());
       }
       break;
     }
