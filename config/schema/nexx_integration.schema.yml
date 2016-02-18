@@ -8,3 +8,6 @@ nexx_integration.settings:
     nexx_api_url:
       type: string
       label:  'The URL to the nexx CRUD API.'
+    omnia_id:
+      type: integer
+      label:  'The unique identifier of the site, given by nexx.tv.'

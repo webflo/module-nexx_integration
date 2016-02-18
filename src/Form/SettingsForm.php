@@ -76,6 +76,14 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $api_url,
     ];
 
+    $omnia_id = !empty($values['omnia_id']) ? $values['omnia_id'] : $settings->get('omnia_id');
+    $form['omnia_id'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Omnia ID'),
+      '#description' => 'The unique identifier of the site, given by nexx.tv.',
+      '#default_value' => $omnia_id,
+    ];
+
     // Add the embed type plugin settings.
     $form['type_settings'] = [
       '#type' => 'container',
@@ -108,6 +116,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('channel_vocabulary', $values['vocabulary_settings']['channel_vocabulary'])
       ->set('actor_vocabulary', $values['vocabulary_settings']['actor_vocabulary'])
       ->set('nexx_api_url', $values['nexx_api_url'])
+      ->set('omnia_id', $values['omnia_id'])
       ->save();
   }
 
