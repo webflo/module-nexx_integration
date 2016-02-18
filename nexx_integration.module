@@ -1,19 +1,38 @@
 <?php
 use Drupal\Core\Entity\EntityInterface;
 
+/**
+ * Implements hook_taxonomy_term_insert() to insert terms into nexxOMNIA video CMS.
+ */
 function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
   nexx_integration_taxonomy_term_request($term, 'insert');
 }
 
+/**
+ * Implements hook_taxonomy_term_update() to update terms into nexxOMNIA video CMS.
+ */
 function nexx_integration_taxonomy_term_update(EntityInterface $term) {
   nexx_integration_taxonomy_term_request($term, 'update');
 }
 
+/**
+ * Implements hook_taxonomy_term_delete() to delete terms into nexxOMNIA video CMS.
+ */
 function nexx_integration_taxonomy_term_delete(EntityInterface $term) {
   nexx_integration_taxonomy_term_request($term, 'delete');
 }
 
-function nexx_integration_taxonomy_term_request(EntityInterface $term, $method) {
+/**
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $term
+ *   The term to create / modify / delete at nexxOMNIA
+ * @param string $operation
+ *   The operation to perform. Valid values are:
+ *     - create
+ *     - update
+ *     - delete
+ */
+function nexx_integration_taxonomy_term_request(EntityInterface $term, $operation) {
   $term_bundle = $term->bundle();
   $container = \Drupal::getContainer();
   $entity_type_manager = \Drupal::entityTypeManager();
@@ -27,12 +46,29 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $method) 
       $channel_field_settings = $field_definitions[$configuration['channel_field']]->getSetting('handler_settings');
       $actors_field_settings = $field_definitions[$configuration['actor_field']]->getSetting('handler_settings');
 
+      /**
+       * Omnia might add more taxonomies then channel and actor in the future.
+       * Prepare for this by removing the hard coded names
+       */
       if(in_array($term_bundle, $channel_field_settings['target_bundles'])){
-        $nexx_notification->$method('channel', $term->id(), $term->label());
+        $nexx_notification->$operation('channel', $term->id(), $term->label());
       } else if (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
-        $nexx_notification->$method('actor', $term->id(), $term->label());
+        $nexx_notification->$operation('actor', $term->id(), $term->label());
       }
       break;
     }
   }
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function nexx_integration_theme() {
+  return array(
+    'nexx_player' => array(
+      'variables' => array('video_id' => NULL, 'omnia_id' => NULL, 'container_id' => NULL),
+      'template' => 'nexx-player',
+    ),
+  );
 }
