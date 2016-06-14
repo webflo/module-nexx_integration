@@ -1,9 +1,37 @@
 <?php
+use Drupal\Core\Database\Database;
 
 /**
  * @file
  * Install, uninstall and update hooks for nexx integration module.
  */
+
+/**
+ * Implements hook_schema().
+ */
+function nexx_integration_schema() {
+  $schema['nexx_taxonomy_term_data'] = array(
+    'description' => 'Stores taxonomy data for exchange with Omnia video cms per taxonomy term.',
+    'fields' => array(
+      'tid' => array(
+        'description' => 'Taxonomy term id: {taxonomy_term_data}.tid.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'nexx_item_id' => array(
+        'description' => 'Nexx item ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      )
+    ),
+    'primary key' => array('tid')
+  );
+  return $schema;
+}
 
 /**
  * Implements hook_install().
@@ -12,4 +40,56 @@ function nexx_integration_install() {
   $source = drupal_get_path('module', 'nexx_integration') . '/images/icons';
   $destination = \Drupal::config('media_entity.settings')->get('icon_base');
   media_entity_copy_icons($source, $destination);
+}
+
+/**
+ * Add nexx_taxonomy_term_data database schema.
+ */
+function nexx_integration_update_8001() {
+  $spec = array(
+    'description' => 'Stores taxonomy data for exchange with Omnia video cms per taxonomy term.',
+    'fields' => array(
+      'tid' => array(
+        'description' => 'Taxonomy term id: {taxonomy_term_data}.tid.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vid' => array(
+        'description' => 'The ID of the terms target entity: {taxonomy_term_data}.vid.',
+        'type' => 'varchar_ascii',
+        'not null' => TRUE,
+        'length' => 32,
+      ),
+      'nexx_item_id' => array(
+        'description' => 'Nexx item ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      )
+    )
+  );
+  $schema = Database::getConnection()->schema();
+  $schema->createTable('nexx_taxonomy_term_data', $spec);
+}
+
+/**
+ * removed faulty update
+ */
+function nexx_integration_update_8002(){}
+
+/**
+ * Add primary key, remove vid
+ */
+function nexx_integration_update_8003(){
+  $spec = array('tid');
+  $schema = Database::getConnection()->schema();
+
+  // A primary key.
+  $schema->addPrimaryKey('nexx_taxonomy_term_data', $spec);
+
+  // remove unused vid column
+  $schema->dropField('nexx_taxonomy_term_data', 'vid');
 }

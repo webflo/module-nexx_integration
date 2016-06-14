@@ -13,8 +13,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 
 /**
  * Defines a form that configures nexx video settings.
@@ -23,7 +23,7 @@ class SettingsForm extends ConfigFormBase {
   /**
    * The entity manager service.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityManagerInterface
    */
   protected $entityManager;
 
@@ -40,7 +40,7 @@ class SettingsForm extends ConfigFormBase {
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_manager){
+  public function __construct(ConfigFactoryInterface $config_factory, EntityManagerInterface $entity_manager){
     parent::__construct($config_factory);
     $this->entityManager = $entity_manager;
   }
@@ -51,7 +51,7 @@ class SettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('entity_type.manager')
+      $container->get('entity.manager')
     );
   }
 
@@ -74,6 +74,13 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('API Url'),
       '#default_value' => $api_url,
+    ];
+
+    $api_key = !empty($values['nexx_api_authkey']) ? $values['nexx_api_authkey'] : $settings->get('nexx_api_authkey');
+    $form['nexx_api_authkey'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('API authkey'),
+      '#default_value' => $api_key,
     ];
 
     $omnia_id = !empty($values['omnia_id']) ? $values['omnia_id'] : $settings->get('omnia_id');
@@ -110,12 +117,12 @@ class SettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
-
     $this->config('nexx_integration.settings')
       ->set('video_bundle', $values['type_settings']['video_bundle'])
       ->set('channel_vocabulary', $values['vocabulary_settings']['channel_vocabulary'])
       ->set('actor_vocabulary', $values['vocabulary_settings']['actor_vocabulary'])
       ->set('nexx_api_url', $values['nexx_api_url'])
+      ->set('nexx_api_authkey', $values['nexx_api_authkey'])
       ->set('omnia_id', $values['omnia_id'])
       ->save();
   }

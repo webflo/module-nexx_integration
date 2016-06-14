@@ -1,5 +1,8 @@
-<script src='//require.nexxcdn.com/{{ omnia_id }}' type='text/javascript'></script>
-<div id='{{ container_id }}'></div>
+<script src='//require.nexx.cloud/{{ omnia_id }}' type='text/javascript'></script>
+<div id='{{ container_id }}' class="nexx-video"></div>
 <script type='text/javascript'>
-    onPLAYReady=function(){_play.init('{{ container_id }}',{{ video_id }} ,'single');}
+    function onPLAYReady(){
+        _play.preInit.setDatamode('static');
+        _play.init('{{ container_id }}',{{ video_id }} ,'single');
+    }
 </script>

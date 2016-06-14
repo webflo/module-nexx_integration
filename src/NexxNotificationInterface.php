@@ -47,6 +47,6 @@ interface NexxNotificationInterface {
    *        - tag: arbitrary tag
    * @param $reference_number drupal id of the given taxonomy term
    */
-  function delete($streamtype, $reference_number);
+  function delete($streamtype, $reference_number, $values);
 }
 
