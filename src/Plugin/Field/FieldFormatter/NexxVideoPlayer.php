@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @FieldFormatter(
  *   id = "nexx_video_player",
  *   module = "nexx_integration",
- *   label = @Translation("Empty formatter"),
+ *   label = @Translation("Video Player"),
  *   field_types = {
  *     "nexx_video_data"
  *   }
