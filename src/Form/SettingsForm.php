@@ -119,8 +119,6 @@ class SettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
     $this->config('nexx_integration.settings')
       ->set('video_bundle', $values['type_settings']['video_bundle'])
-      ->set('channel_vocabulary', $values['vocabulary_settings']['channel_vocabulary'])
-      ->set('actor_vocabulary', $values['vocabulary_settings']['actor_vocabulary'])
       ->set('nexx_api_url', $values['nexx_api_url'])
       ->set('nexx_api_authkey', $values['nexx_api_authkey'])
       ->set('omnia_id', $values['omnia_id'])

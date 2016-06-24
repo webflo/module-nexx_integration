@@ -83,8 +83,6 @@ class NexxVideoInfo extends WidgetBase implements ContainerFactoryPluginInterfac
     array &$form,
     FormStateInterface $form_state
   ) {
-    $settings = $this->configFactory->get('nexx_integration.settings');
-
     $element['item_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Item ID'),

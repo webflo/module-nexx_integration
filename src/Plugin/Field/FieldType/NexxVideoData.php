@@ -12,6 +12,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
 
+
 /**
  * Plugin implementation of the 'nexx_video_data' field type.
  *
@@ -66,6 +67,10 @@ class NexxVideoData extends FieldItemBase {
           'type' => 'int',
         ),
         'actors_ids' => array(
+          'type' => 'varchar',
+          'length' => 256,
+        ),
+        'tags_ids' => array(
           'type' => 'varchar',
           'length' => 256,
         ),
@@ -185,6 +190,8 @@ class NexxVideoData extends FieldItemBase {
       ->setLabel(t('Channel ID'));
     $properties['actors_ids'] = DataDefinition::create('string')
       ->setLabel(t('Actor IDs'));
+    $properties['tags_ids'] = DataDefinition::create('string')
+      ->setLabel(t('Tag IDs'));
     $properties['isSSC'] = DataDefinition::create('boolean')
       ->setLabel(t('isSSC'));
     $properties['encodedSSC'] = DataDefinition::create('boolean')

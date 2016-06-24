@@ -170,6 +170,16 @@ class NexxVideo extends MediaTypeBase {
       '#description' => $this->t('The taxonomy which is used for actors. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
     ];
 
+    $default_bundle = !empty($values['tag_field']) ? $values['tag_field'] : $this->configuration['tag_field'];
+    $form['tag_field'] = [
+      '#type' => 'select',
+      '#title' => 'Tag ' . $bundle->label() ?: $this->t('Fields'),
+      '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
+      '#empty_option' => $this->t('Select field'),
+      '#default_value' => $default_bundle,
+      '#description' => $this->t('The taxonomy which is used for tags. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
+    ];
+
     $default_bundle = !empty($values['teaser_image_field']) ? $values['teaser_image_field'] : $this->configuration['teaser_image_field'];
     $form['teaser_image_field'] = [
       '#type' => 'select',
