@@ -100,6 +100,7 @@ function nexx_integration_update_8003() {
  * Add new tags_ids field to nexx field type
  */
 function nexx_integration_update_8004(&$sandbox) {
+  $messages = [];
   $database = \Drupal::database();
   $database_schema = $database->schema();
   $entity_types = \Drupal::entityTypeManager()->getDefinitions();
@@ -115,14 +116,17 @@ function nexx_integration_update_8004(&$sandbox) {
     foreach ($item as $table_name => $table_schema) {
       foreach ($table_schema as $schema_key => $schema_data) {
         if ($schema_key === 'fields') {
-          #drush_print ("Table: " . $table_name);
           // test if field schema contains a known nexx property
           // TODO: investigate how to properly determine, if we are dealing with a nexx field
           $existing_field_property = $field_name . '_encodedSSC';
           $new_field_property = $field_name . '_tags_ids';
           if(isset($schema_data[$existing_field_property])) {
             // This is the actual update, adding the new field
-            if(!$database_schema->fieldExists($table_name, $new_field_property)) {
+            if($database_schema->tableExists($table_name) && !$database_schema->fieldExists($table_name, $new_field_property)) {
+              $messages[] = t('Updating nexx field @field in table @table', array(
+                '@field' => $field_name,
+                '@table' => $table_name,
+              ));
               $database_schema->addField($table_name, $new_field_property, [
                 'type' => 'varchar',
                 'length' => 256,
@@ -132,5 +136,9 @@ function nexx_integration_update_8004(&$sandbox) {
         }
       }
     }
+  }
+
+  if (!empty($messages)) {
+    return implode('</br>', $messages);
   }
 }
