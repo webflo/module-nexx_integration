@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\nexx_integration\Plugin\Field\FieldType\NexxVideoData.
- */
-
 namespace Drupal\nexx_integration\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
-
 
 /**
  * Plugin implementation of the 'nexx_video_data' field type.
@@ -25,6 +18,7 @@ use Drupal\Core\TypedData\DataDefinition;
  * )
  */
 class NexxVideoData extends FieldItemBase {
+
   /**
    * {@inheritdoc}
    */
@@ -77,80 +71,80 @@ class NexxVideoData extends FieldItemBase {
         'isSSC' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'encodedSSC' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'validfrom_ssc' => array(
-          'type' => 'int'
+          'type' => 'int',
         ),
         'validto_ssc' => array(
-          'type' => 'int'
+          'type' => 'int',
         ),
         'encodedHTML5' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'isMOBILE' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'encodedMOBILE' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'validfrom_mobile' => array(
-          'type' => 'int'
+          'type' => 'int',
         ),
         'validto_mobile' => array(
-          'type' => 'int'
+          'type' => 'int',
         ),
         'isHYVE' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'encodedHYVE' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'validfrom_hyve' => array(
-          'type' => 'int'
+          'type' => 'int',
         ),
         'validto_hyve' => array(
-          'type' => 'int'
+          'type' => 'int',
         ),
         'active' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'isDeleted' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'isBlocked' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'encodedTHUMBS' => array(
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => 'true'
+          'unsigned' => 'true',
         ),
         'thumb' => array(
           'type' => 'varchar',
           'length' => 256,
-        )
+        ),
       ),
     );
   }
@@ -229,4 +223,5 @@ class NexxVideoData extends FieldItemBase {
 
     return $properties;
   }
+
 }

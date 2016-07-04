@@ -1,10 +1,11 @@
 <?php
-use Drupal\Core\Database\Database;
 
 /**
  * @file
  * Install, uninstall and update hooks for nexx integration module.
  */
+
+use Drupal\Core\Database\Database;
 
 /**
  * Implements hook_schema().
@@ -26,9 +27,9 @@ function nexx_integration_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-      )
+      ),
     ),
-    'primary key' => array('tid')
+    'primary key' => array('tid'),
   );
   return $schema;
 }
@@ -68,21 +69,21 @@ function nexx_integration_update_8001() {
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-      )
-    )
+      ),
+    ),
   );
   $schema = Database::getConnection()->schema();
   $schema->createTable('nexx_taxonomy_term_data', $spec);
 }
 
 /**
- * removed faulty update
+ * Removed faulty update.
  */
 function nexx_integration_update_8002() {
 }
 
 /**
- * Add primary key, remove vid
+ * Add primary key, remove vid.
  */
 function nexx_integration_update_8003() {
   $spec = array('tid');
@@ -91,13 +92,12 @@ function nexx_integration_update_8003() {
   // A primary key.
   $schema->addPrimaryKey('nexx_taxonomy_term_data', $spec);
 
-  // remove unused vid column
+  // Remove unused vid column.
   $schema->dropField('nexx_taxonomy_term_data', 'vid');
 }
 
-
 /**
- * Add new tags_ids field to nexx field type
+ * Add new tags_ids field to nexx field type.
  */
 function nexx_integration_update_8004(&$sandbox) {
   $messages = [];
@@ -109,20 +109,21 @@ function nexx_integration_update_8004(&$sandbox) {
   foreach ($schema as $item_name => $item) {
     list($entity_type_id, , $field_name) = explode('.', $item_name);
 
-    // Basic sanity check
+    // Basic sanity check.
     if (!isset($entity_types[$entity_type_id])) {
       continue;
     }
     foreach ($item as $table_name => $table_schema) {
       foreach ($table_schema as $schema_key => $schema_data) {
         if ($schema_key === 'fields') {
-          // test if field schema contains a known nexx property
-          // TODO: investigate how to properly determine, if we are dealing with a nexx field
+          // Test if field schema contains a known nexx property.
+          // TODO: investigate how to properly determine,
+          // if we are dealing with a nexx field.
           $existing_field_property = $field_name . '_encodedSSC';
           $new_field_property = $field_name . '_tags_ids';
-          if(isset($schema_data[$existing_field_property])) {
-            // This is the actual update, adding the new field
-            if($database_schema->tableExists($table_name) && !$database_schema->fieldExists($table_name, $new_field_property)) {
+          if (isset($schema_data[$existing_field_property])) {
+            // This is the actual update, adding the new field.
+            if ($database_schema->tableExists($table_name) && !$database_schema->fieldExists($table_name, $new_field_property)) {
               $messages[] = t('Updating nexx field @field in table @table', array(
                 '@field' => $field_name,
                 '@table' => $table_name,

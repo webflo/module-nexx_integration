@@ -2,7 +2,7 @@
 
 /**
  * @file
- *   Drush commands for the nexx_integration module
+ * Drush commands for the nexx_integration module.
  */
 
 /**
@@ -20,24 +20,25 @@ function nexx_integration_drush_command() {
     'examples' => array(
       'drush -l http://example.com nexx-export-taxonomy category channel' => 'Export drupal categories vocabulary to omnia channel',
       'drush -l http://example.com nexx-export-taxonomy people actors' => 'Export drupal people vocabulary to omnia actors',
-    )
+    ),
   );
 
   return $items;
 }
 
-
 /**
  * Implements the nexx-export-taxonomy drush command.
  *
- * @param (string) $source_vocabulary The drupal vocabulary to export.
- * @param (string) $destination The omnia destination to export to.
+ * @param (string) $source_vocabulary
+ *   The drupal vocabulary to export.
+ * @param (string) $destination
+ *   The omnia destination to export to.
  */
 function drush_nexx_integration_nexx_export_taxonomy($source_vocabulary, $destination) {
   $type_manager = \Drupal::entityTypeManager();
 
   $vocabulary = $type_manager->getStorage("taxonomy_vocabulary")->load($source_vocabulary);
-  if(empty($vocabulary)){
+  if (empty($vocabulary)) {
     drush_set_error(dt("Given vocabulary !vocabulary does not exist.", array('!vocabulary' => $source_vocabulary)));
     exit;
   }
@@ -46,7 +47,7 @@ function drush_nexx_integration_nexx_export_taxonomy($source_vocabulary, $destin
     ->getStorage("taxonomy_term")
     ->loadTree($source_vocabulary, 0, NULL, TRUE);
 
-  foreach($terms as $term) {
+  foreach ($terms as $term) {
     nexx_integration_taxonomy_term_update($term);
   }
 }

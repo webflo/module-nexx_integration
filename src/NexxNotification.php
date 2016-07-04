@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\nexx_integration\NexxNotification
- */
-
 namespace Drupal\nexx_integration;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -15,6 +10,11 @@ use Drupal\Component\Serialization\Json;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
+/**
+ * Class NexxNotification.
+ *
+ * @package Drupal\nexx_integration
+ */
 class NexxNotification implements NexxNotificationInterface {
 
   /**
@@ -38,12 +38,16 @@ class NexxNotification implements NexxNotificationInterface {
   protected $logger;
 
   /**
+   * The HTTP client.
+   *
    * @var \GuzzleHttp\Client
    */
   protected $httpClient;
 
   /**
-   * Notify nexxOMNIA video CMS when channel or actor terms have been updated,
+   * Notify nexxOMNIA video CMS.
+   *
+   * Notify when channel or actor terms have been updated,
    * or when a video has been created.
    *
    * @param EntityTypeManagerInterface $entity_type_manager
@@ -53,9 +57,9 @@ class NexxNotification implements NexxNotificationInterface {
    * @param ConfigFactoryInterface $config_factory
    *   The config factory service.
    * @param LoggerChannelFactory $logger
-   *  The logger service
+   *   The logger service.
    * @param Client $http_client
-   *  The HTTP client
+   *   The HTTP client.
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
@@ -80,10 +84,10 @@ class NexxNotification implements NexxNotificationInterface {
     }
     $response = $this->notificateNexx($streamtype, $reference_number, 'insert', $values);
     $this->logger->info("insert @type. Reference number: @reference, values: @values", array(
-        '@type' => $streamtype,
-        '@reference' => $reference_number,
-        '@values' => print_r($values, TRUE)
-      )
+      '@type' => $streamtype,
+      '@reference' => $reference_number,
+      '@values' => print_r($values, TRUE),
+    )
     );
     return $response;
   }
@@ -94,10 +98,10 @@ class NexxNotification implements NexxNotificationInterface {
   function update($streamtype, $reference_number, $values) {
     $response = $this->notificateNexx($streamtype, $reference_number, 'update', $values);
     $this->logger->info("update @type. Reference number: @reference, values: @values", array(
-        '@type' => $streamtype,
-        '@reference' => $reference_number,
-        '@values' => print_r($values, TRUE)
-      )
+      '@type' => $streamtype,
+      '@reference' => $reference_number,
+      '@values' => print_r($values, TRUE),
+    )
     );
     return $response;
   }
@@ -111,16 +115,16 @@ class NexxNotification implements NexxNotificationInterface {
     }
     $response = $this->notificateNexx($streamtype, $reference_number, 'delete', $values);
     $this->logger->info("delete @type. Reference number: @reference", array(
-        '@type' => $streamtype,
-        '@reference' => $reference_number
-      )
+      '@type' => $streamtype,
+      '@reference' => $reference_number,
+    )
     );
 
     return $response;
   }
 
   /**
-   * Send a crud notification to nexx
+   * Send a crud notification to nexx.
    *
    * @param string $streamtype
    *   The data type to update. Possible values are:
@@ -153,7 +157,7 @@ class NexxNotification implements NexxNotificationInterface {
       'streamtype' => $streamtype,
       'command' => $command,
       'refnr' => $reference_number,
-      'authkey' =>  $api_authkey
+      'authkey' => $api_authkey,
     ];
 
     if (isset($values)) {
@@ -165,33 +169,34 @@ class NexxNotification implements NexxNotificationInterface {
         'form_params' => $data,
       );
 
-      //$this->logger->debug("Send http POST request to @url with option: @options", ['@url' => $api_url, '@options' => print_r($options, TRUE)]);
+      // $this->logger->debug("Send http POST request to @url with option: @options", ['@url' => $api_url, '@options' => print_r($options, TRUE)]);.
       $response = $this->httpClient->request('POST', $api_url, $options);
       $response_data = Json::decode($response->getBody()->getContents());
 
-      if($response_data['state'] !== 'ok') {
+      if ($response_data['state'] !== 'ok') {
         $this->logger->error("Omnia request failed: @error", array(
-            '@error' => $response_data['info']
-          )
+          '@error' => $response_data['info'],
+        )
         );
       }
       else {
         $this->logger->info("Successful notification. Streamtype '@streamtype', command '@command', refnr '@refnr', values '@values' options @options", array(
-            '@streamtype' => $streamtype,
-            '@command' => $command,
-            '@refnr' => $reference_number,
-            '@values' => print_r($values, TRUE),
-            '@options' => print_r($options, TRUE)
-          )
+          '@streamtype' => $streamtype,
+          '@command' => $command,
+          '@refnr' => $reference_number,
+          '@values' => print_r($values, TRUE),
+          '@options' => print_r($options, TRUE),
+        )
         );
       }
-    } catch (RequestException $e) {
+    }
+    catch (RequestException $e) {
       $this->logger->error("HTTP request failed: @error", array(
-          '@error' => $e->getMessage()
-        )
+        '@error' => $e->getMessage(),
+      )
       );
     }
     return $response_data;
   }
-}
 
+}

@@ -1,8 +1,15 @@
 <?php
+
+/**
+ * @file
+ */
+
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Implements hook_taxonomy_term_insert() to insert terms into nexxOMNIA video CMS.
+ * Implements hook_taxonomy_term_insert().
+ *
+ * Used to insert terms into nexxOMNIA video CMS.
  */
 function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
   $database = \Drupal::getContainer()->get('database');
@@ -10,16 +17,18 @@ function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
 
   if (!empty($response_data['item'])) {
     $database->merge('nexx_taxonomy_term_data')->key([
-      'tid' => $term->id()
+      'tid' => $term->id(),
     ])->fields([
       'tid' => $term->id(),
-      'nexx_item_id' => $response_data['item']
+      'nexx_item_id' => $response_data['item'],
     ])->execute();
   }
 }
 
 /**
- * Implements hook_taxonomy_term_update() to update terms into nexxOMNIA video CMS.
+ * Implements hook_taxonomy_term_update().
+ *
+ * Used to update terms into nexxOMNIA video CMS.
  */
 function nexx_integration_taxonomy_term_update(EntityInterface $term) {
   $logger = \Drupal::getContainer()
@@ -29,52 +38,55 @@ function nexx_integration_taxonomy_term_update(EntityInterface $term) {
   $database = \Drupal::getContainer()->get('database');
   $nexx_id = nexx_integration_taxonomy_term_nexx_id($term);
 
-  // no nexx_id found, we need to insert the term
+  // No nexx_id found, we need to insert the term.
   if (!$nexx_id) {
     nexx_integration_taxonomy_term_insert($term);
-  } else {
+  }
+  else {
     $response_data = nexx_integration_taxonomy_term_request($term, 'update', ['item' => $nexx_id]);
 
-    // If omnia does not know the object yet, insert it
+    // If omnia does not know the object yet, insert it.
     if ($response_data['state'] === 'error' && $response_data['info'] === 'no object') {
       $logger->info('Unknown update object, inserting it instead');
       $response_data = nexx_integration_taxonomy_term_request($term, 'insert');
     }
     if (!empty($response_data['item'])) {
       $database->merge('nexx_taxonomy_term_data')->key([
-        'tid' => $term->id()
+        'tid' => $term->id(),
       ])->fields([
         'tid' => $term->id(),
-        'nexx_item_id' => $response_data['item']
+        'nexx_item_id' => $response_data['item'],
       ])->execute();
     }
   }
 }
 
-
 /**
- * Implements hook_taxonomy_term_delete() to delete terms into nexxOMNIA video CMS.
+ * Implements hook_taxonomy_term_delete().
+ *
+ * Used to delete terms into nexxOMNIA video CMS.
  */
 function nexx_integration_taxonomy_term_delete(EntityInterface $term) {
   $database = \Drupal::getContainer()->get('database');
   $nexx_id = nexx_integration_taxonomy_term_nexx_id($term);
-  $response_data = nexx_integration_taxonomy_term_request($term, 'delete', ['item' => $nexx_id]);
+  nexx_integration_taxonomy_term_request($term, 'delete', ['item' => $nexx_id]);
 
-  // remove stale entry
+  // Remove stale entry.
   $database->delete('nexx_taxonomy_term_data')
     ->condition('tid', $term->id())
     ->execute();
 }
 
 /**
+ * Implements hook_taxonomy_term_request().
  *
  * @param \Drupal\Core\Entity\EntityInterface $term
- *   The term to create / modify / delete at nexxOMNIA
+ *   The term to create / modify / delete at nexxOMNIA.
  * @param string $command
  *   The command to perform. Valid values are:
  *     - create
  *     - update
- *     - delete
+ *     - delete.
  */
 function nexx_integration_taxonomy_term_request(EntityInterface $term, $command, $additional_params = []) {
   $term_bundle = $term->bundle();
@@ -89,7 +101,7 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
     return;
   }
 
-  /**
+  /*
    * Find media bundles, that have a setting for this vocabulary
    */
   foreach ($container->get('entity_type.bundle.info')
@@ -112,29 +124,31 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
         $tags_field_settings = $field_definitions[$configuration['tags_field']]->getSetting('handler_settings');
       }
 
-      /**
-       * TODO: Omnia might add more taxonomies then channel and actor in the future.
-       * Prepare for this by removing the hard coded names
+      /*
+       * TODO: Omnia might add more taxonomies then channel
+       * and actor in the future.
+       *
+       * Prepare for this by removing the hard coded names.
        */
-
       if (in_array($term_bundle, $channel_field_settings['target_bundles'])) {
         $streamtype = "channel";
         $params = ['title' => $term->label()] + $additional_params;
-      } elseif (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
+      }
+      elseif (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
         $streamtype = "actor";
         $params = ['artistname' => $term->label()] + $additional_params;
-      } elseif (in_array($term_bundle, $tags_field_settings['target_bundles'])) {
+      }
+      elseif (in_array($term_bundle, $tags_field_settings['target_bundles'])) {
         $streamtype = "tag";
         $params = ['tag' => $term->label()] + $additional_params;
       }
 
-       $response_data = $nexx_notification->$command($streamtype, $term->id(), $params);
+      $response_data = $nexx_notification->$command($streamtype, $term->id(), $params);
       break;
     }
   }
   return $response_data;
 }
-
 
 /**
  * Implements hook_theme().
@@ -145,22 +159,24 @@ function nexx_integration_theme() {
       'variables' => array(
         'video_id' => NULL,
         'omnia_id' => NULL,
-        'container_id' => NULL
+        'container_id' => NULL,
       ),
       'template' => 'nexx-player',
     ),
     'omnia_editor' => array(
       'variables' => array(
-        'auth_key' => NULL
+        'auth_key' => NULL,
       ),
-      'template' => 'omnia-editor'
-    )
+      'template' => 'omnia-editor',
+    ),
   );
 }
 
-
 /**
+ * Implements hook_taxonomy_term_nexx_id().
+ *
  * @param \Drupal\Core\Entity\EntityInterface $term
+ *
  * @return array
  */
 function nexx_integration_taxonomy_term_nexx_id(EntityInterface $term) {
@@ -169,5 +185,5 @@ function nexx_integration_taxonomy_term_nexx_id(EntityInterface $term) {
     ->fields('n', array('nexx_item_id'))
     ->condition('n.tid', $term->id())
     ->execute();
-  return  $result->fetchField();
+  return $result->fetchField();
 }
