@@ -5,16 +5,13 @@ use Drupal\Core\Entity\EntityInterface;
  * Implements hook_taxonomy_term_insert() to insert terms into nexxOMNIA video CMS.
  */
 function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
-  $database = \Drupal::getContainer()->get('database');
   $response_data = nexx_integration_taxonomy_term_request($term, 'insert');
 
   if (!empty($response_data['item'])) {
-    $database->merge('nexx_taxonomy_term_data')->key([
-      'tid' => $term->id()
-    ])->fields([
-      'tid' => $term->id(),
-      'nexx_item_id' => $response_data['item']
-    ])->execute();
+    $drupal_id = $term->id();
+    $nexx_id = $response_data['item'];
+
+    update_nexx_term_id_mapping($drupal_id, $nexx_id);
   }
 }
 
@@ -26,13 +23,13 @@ function nexx_integration_taxonomy_term_update(EntityInterface $term) {
     ->get('logger.factory')
     ->get('nexx_integration');
 
-  $database = \Drupal::getContainer()->get('database');
   $nexx_id = nexx_integration_taxonomy_term_nexx_id($term);
 
   // no nexx_id found, we need to insert the term
   if (!$nexx_id) {
     nexx_integration_taxonomy_term_insert($term);
-  } else {
+  }
+  else {
     $response_data = nexx_integration_taxonomy_term_request($term, 'update', ['item' => $nexx_id]);
 
     // If omnia does not know the object yet, insert it
@@ -41,12 +38,10 @@ function nexx_integration_taxonomy_term_update(EntityInterface $term) {
       $response_data = nexx_integration_taxonomy_term_request($term, 'insert');
     }
     if (!empty($response_data['item'])) {
-      $database->merge('nexx_taxonomy_term_data')->key([
-        'tid' => $term->id()
-      ])->fields([
-        'tid' => $term->id(),
-        'nexx_item_id' => $response_data['item']
-      ])->execute();
+      $drupal_id = $term->id();
+      $nexx_id = $response_data['item'];
+
+      update_nexx_term_id_mapping($drupal_id, $nexx_id);
     }
   }
 }
@@ -120,15 +115,25 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
       if (in_array($term_bundle, $channel_field_settings['target_bundles'])) {
         $streamtype = "channel";
         $params = ['title' => $term->label()] + $additional_params;
-      } elseif (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
+
+        // Omnia knows the concept of parents for the channel taxonomy
+        // But only one parent per term is allowed. Drupal allows multiple
+        // parents per term, so we use only the first term for mapping
+        $parents = $entity_type_manager->getStorage('taxonomy_term')->loadParents($term->id());
+        if($parents) {
+          $params['parent'] = array_shift($parents)->id();
+        }
+      }
+      elseif (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
         $streamtype = "actor";
         $params = ['artistname' => $term->label()] + $additional_params;
-      } elseif (in_array($term_bundle, $tags_field_settings['target_bundles'])) {
+      }
+      elseif (in_array($term_bundle, $tags_field_settings['target_bundles'])) {
         $streamtype = "tag";
         $params = ['tag' => $term->label()] + $additional_params;
       }
 
-       $response_data = $nexx_notification->$command($streamtype, $term->id(), $params);
+      $response_data = $nexx_notification->$command($streamtype, $term->id(), $params);
       break;
     }
   }
@@ -169,5 +174,21 @@ function nexx_integration_taxonomy_term_nexx_id(EntityInterface $term) {
     ->fields('n', array('nexx_item_id'))
     ->condition('n.tid', $term->id())
     ->execute();
-  return  $result->fetchField();
+  return $result->fetchField();
+}
+
+/**
+ * Update nexx term id mapping table.
+ *
+ * @param $drupal_id The drupal tid of the term.
+ * @param $nexx_id The nexx id of the same term
+ */
+function update_nexx_term_id_mapping($drupal_id, $nexx_id) {
+  $database = \Drupal::getContainer()->get('database');
+  $database->merge('nexx_taxonomy_term_data')->key([
+    'tid' => $drupal_id
+  ])->fields([
+    'tid' => $drupal_id,
+    'nexx_item_id' => $nexx_id
+  ])->execute();
 }
