@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\nexx_integration\Plugin\Field\FieldFormatter\NexxVideoPlayer.
- */
-
 namespace Drupal\nexx_integration\Plugin\Field\FieldFormatter;
 
 use Drupal\Component\Utility\Crypt;
@@ -27,10 +22,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   }
  * )
  */
-class NexxVideoPlayer extends FormatterBase implements ContainerFactoryPluginInterface{
+class NexxVideoPlayer extends FormatterBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The The nexx configuration object
+   * The nexx configuration object.
    *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
@@ -92,17 +87,18 @@ class NexxVideoPlayer extends FormatterBase implements ContainerFactoryPluginInt
         '#container_id' => 'player--' . Crypt::randomBytesBase64(8),
         '#attached' => array(
           'library' => array(
-            'nexx_integration/base'
-          )
-        )
+            'nexx_integration/base',
+          ),
+        ),
         /*
         '#cache' => [
           'tags' => $user->getCacheTags(),
         ],
-        */
+         */
       ];
     }
 
     return $elements;
   }
+
 }

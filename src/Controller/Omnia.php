@@ -8,19 +8,27 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Utility\Token;
 use Drupal\media_entity\MediaInterface;
-use Drupal\media_entity\Entity\MediaBundle;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * Class Omnia.
+ *
+ * @package Drupal\nexx_integration\Controller
+ */
 class Omnia extends ControllerBase {
   /**
+   * The database service.
+   *
    * @var \Drupal\Core\Database\Connection
    */
   protected $database;
 
   /**
+   * The entity type bundle info service.
+   *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfo
    */
   protected $entityTypeBundleInfo;
@@ -31,42 +39,53 @@ class Omnia extends ControllerBase {
   protected $mediaEntity;
 
   /**
+   * The media entity storage.
+   *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $mediaEntityStorage;
 
   /**
+   * The media entity definition.
+   *
    * @var \Drupal\Core\Entity\EntityTypeInterface
    */
   protected $mediaEntityDefinition;
 
   /**
+   * The entity field manager.
+   *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected $entityFieldManager;
 
   /**
+   * The logger service.
+   *
    * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
 
   /**
+   * Token service.
+   *
    * @var \Drupal\Core\Utility\Token;
    */
   protected $token;
 
   /**
+   * Omnia constructor.
    *
-   * @param Database $database
-   *  The database service.
+   * @param Connection $database
+   *   The database service.
    * @param EntityTypeBundleInfoInterface $entity_type_bundle_info
-   *  The entity type bundle info service.
+   *   The entity type bundle info service.
    * @param EntityFieldManagerInterface $entity_field_manager
-   *  The entity field manager
+   *   The entity field manager.
    * @param LoggerInterface $logger
-   *  The logger service
+   *   The logger service.
    * @param Token $token
-   *  Token service
+   *   Token service.
    */
   public function __construct(
     Connection $database,
@@ -96,7 +115,7 @@ class Omnia extends ControllerBase {
   }
 
   /**
-   * search and edit videos
+   * Search and edit videos.
    */
   public function videoList() {
     return [
@@ -107,7 +126,7 @@ class Omnia extends ControllerBase {
   }
 
   /**
-   * Endpoint for video creation / update
+   * Endpoint for video creation / update.
    */
   public function video(Request $request) {
     $response = new JsonResponse();
@@ -122,9 +141,9 @@ class Omnia extends ControllerBase {
     }
 
     $this->logger->info('Incoming video "@title" (nexx id: @id)', array(
-        '@title' => $videoData->itemData->title,
-        '@id' => $videoData->itemID
-      )
+      '@title' => $videoData->itemData->title,
+      '@id' => $videoData->itemID,
+    )
     );
 
     $video_field = $this->videoFieldName();
@@ -140,19 +159,21 @@ class Omnia extends ControllerBase {
     $this->mapData($media, $videoData);
     $media->save();
     $this->logger->info('Updated video "@title" (drupal id: @id)', array(
-        '@title' => $videoData->itemData->title,
-        '@id' => $media->id()
-      )
+      '@title' => $videoData->itemData->title,
+      '@id' => $media->id(),
+    )
     );
     $response->setdata([
-        'refnr' => $videoData->itemID,
-        'value' => $media->id()
-      ]
+      'refnr' => $videoData->itemID,
+      'value' => $media->id(),
+    ]
     );
     return $response;
   }
 
-
+  /**
+   *
+   */
   protected function mediaEntity($id = NULL) {
     if (!isset($this->mediaEntity)) {
       $storage = $this->mediaEntityStorage();
@@ -168,12 +189,14 @@ class Omnia extends ControllerBase {
     return $this->mediaEntity;
   }
 
+  /**
+   *
+   */
   protected function mapData(MediaInterface $media, $videoData) {
     $entityType = $this->mediaEntityDefinition();
     $videoField = $this->videoFieldName();
 
     $labelKey = $entityType->getKey('label');
-
 
     $title = !empty($videoData->itemData->title) ? $videoData->itemData->title : '';
     $actor_ids = !empty($videoData->itemData->actors_ids) ? explode(',', $videoData->itemData->actors_ids) : "";
@@ -207,7 +230,7 @@ class Omnia extends ControllerBase {
     $media->$videoField->isBlocked = !empty($videoData->itemStates->isBlocked) ? $videoData->itemStates->isBlocked : 0;
     $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : 0;
 
-    // copy title to label field
+    // Copy title to label field.
     $media->$labelKey = $title;
 
     $media_config = $media->getType()->getConfiguration();
@@ -215,7 +238,7 @@ class Omnia extends ControllerBase {
     $actorField = $media_config['actor_field'];
     $teaserImageField = $media_config['teaser_image_field'];
 
-    // update taxonomy references
+    // Update taxonomy references.
     if ($channelField && !empty($channel_id)) {
       $term_id = $this->mapTermID($channel_id);
       if (!empty($term_id)) {
@@ -223,9 +246,9 @@ class Omnia extends ControllerBase {
       }
       else {
         $this->logger->warning('Unknown ID @term_id for term "@term_name"', array(
-            '@term_id' => $channel_id,
-            '@term_name' => $videoData->itemData->channel
-          )
+          '@term_id' => $channel_id,
+          '@term_name' => $videoData->itemData->channel,
+        )
         );
       }
     }
@@ -246,6 +269,9 @@ class Omnia extends ControllerBase {
     }
   }
 
+  /**
+   *
+   */
   protected function mapTermID($omniaId) {
     $result = $this->database->select('nexx_taxonomy_term_data', 'n')
       ->fields('n', array('tid'))
@@ -264,8 +290,9 @@ class Omnia extends ControllerBase {
     $images_field = $media->$teaserImageField;
     $images_field_target_type = $images_field->getSetting('target_type');
 
-    /**
-     * TODO: there must be a better way to get this information then creating a dummy object
+    /*
+     * TODO: there must be a better way to get this information,
+     *       then creating a dummy object
      */
     $images_field_target_bundle = array_shift($images_field->getSetting('handler_settings')['target_bundles']);
     if (empty($images_field_target_bundle)) {
@@ -276,34 +303,36 @@ class Omnia extends ControllerBase {
 
     $thumbnail_entity = $storage->create([
       'bundle' => $images_field_target_bundle,
-      'name' => $media->label()
+      'name' => $media->label(),
     ]);
     $updated_thumbnail_entity = FALSE;
 
     if ($thumb_uri = $videoData->itemData->thumb) {
-      // get configured source field from media entity type definition
+      // Get configured source field from media entity type definition.
       $thumbnail_upload_field = $thumbnail_entity->getType()
         ->getConfiguration()['source_field'];
-      // get field settings from this field
+      // Get field settings from this field.
       $thumbnail_upload_field_settings = $thumbnail_entity->getFieldDefinition($thumbnail_upload_field)
         ->getSettings();
-      // use file directory and uri_scheme out of these settings to create destination directory for file upload
+      // Use file directory and uri_scheme out of these settings to create
+      // destination directory for file upload.
       $upload_directory = $this->token->replace($thumbnail_upload_field_settings['file_directory']);
       $destination_file = $thumbnail_upload_field_settings['uri_scheme'] . '://' . $upload_directory . '/' . basename($thumb_uri);
       $destination_directory = dirname($destination_file);
       if ($destination_directory) {
-        // import file
+        // Import file.
         file_prepare_directory($destination_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
         $thumbnail = file_save_data(file_get_contents($thumb_uri), $destination_file, FILE_EXISTS_REPLACE);
-        // add this file to thumbnail field of the nexx media entity
+        // Add this file to thumbnail field of the nexx media entity.
         $thumbnail_entity->$thumbnail_upload_field->appendItem([
           'target_id' => $thumbnail->id(),
-          'alt' => $media->label()
+          'alt' => $media->label(),
         ]);
         $updated_thumbnail_entity = TRUE;
       }
     }
-    // if new thumbnails were found, safe the thumbnail media entity and link it to the nexx media entity
+    // If new thumbnails were found,
+    // safe the thumbnail media entity and link it to the nexx media entity.
     if ($updated_thumbnail_entity) {
       $thumbnail_entity->save();
       $media->$teaserImageField = ['target_id' => $thumbnail_entity->id()];
@@ -338,6 +367,9 @@ class Omnia extends ControllerBase {
     return $this->mediaEntityDefinition;
   }
 
+  /**
+   *
+   */
   protected function videoFieldName() {
     $entity_type_id = 'media';
     $videoBundle = $this->config('nexx_integration.settings')
@@ -358,14 +390,18 @@ class Omnia extends ControllerBase {
     return $videoField;
   }
 
+  /**
+   *
+   */
   protected function termId($taxonomy, $name) {
     return array_shift($this->entityTypeManager()
       ->getStorage('taxonomy_term')
       ->loadByProperties([
-          'vid' => $taxonomy,
-          'name' => trim($name)
-        ]
+        'vid' => $taxonomy,
+        'name' => trim($name),
+      ]
       )
     );
   }
+
 }

@@ -1,23 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\nexx_integration\Plugin\MediaEntity\Type\NexxVideo.
- */
-
 namespace Drupal\nexx_integration\Plugin\MediaEntity\Type;
 
 use Drupal\Core\Config\Config;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\media_entity\MediaBundleInterface;
 use Drupal\media_entity\MediaInterface;
 use Drupal\media_entity\MediaTypeBase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
 
 /**
  * Provides media type plugin for Image.
@@ -30,6 +22,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class NexxVideo extends MediaTypeBase {
   /**
+   * The logger service.
+   *
    * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
@@ -50,7 +44,7 @@ class NexxVideo extends MediaTypeBase {
    * @param \Drupal\Core\Config\Config $config
    *   Media entity config object.
    * @param LoggerInterface $logger
-   *  The logger service
+   *   The logger service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, Config $config, LoggerInterface $logger) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $entity_field_manager, $config);
@@ -71,7 +65,6 @@ class NexxVideo extends MediaTypeBase {
       $container->get('logger.factory')->get('nexx_integration')
     );
   }
-
 
   /**
    * {@inheritdoc}
@@ -127,11 +120,9 @@ class NexxVideo extends MediaTypeBase {
       ->load($teaser_image->bundle())
       ->getTypeConfiguration()['source_field'];
 
-    if(!empty($source_field)) {
+    if (!empty($source_field)) {
 
-      /**
-       * @var \Drupal\file\Entity\File $uri
-       */
+      /* @var \Drupal\file\Entity\File $uri */
       $uri = $teaser_image->{$source_field}->first()->entity->getFileUri();
       $this->logger->debug("field map: @field", array('@field' => print_r($teaser_field, TRUE)));
       $this->logger->debug("thumbnail uri: @uri", array('@uri' => $uri));
@@ -141,7 +132,6 @@ class NexxVideo extends MediaTypeBase {
     }
     return $this->getDefaultThumbnail();
   }
-
 
   /**
    * {@inheritdoc}
@@ -195,8 +185,11 @@ class NexxVideo extends MediaTypeBase {
   /**
    * Builds a list of references for a media entity.
    *
-   * @param $bundle_id Entity type to get references for
-   * @param $target_types Target types filter
+   * @param $bundle_id
+   *    Entity type to get references for.
+   * @param array $target_types
+   *    Target types filter.
+   *
    * @return array
    *   An array of field labels, keyed by field name.
    */
@@ -204,8 +197,7 @@ class NexxVideo extends MediaTypeBase {
     $bundle_options = array();
 
     foreach ($this->entityFieldManager->getFieldDefinitions('media', $bundle_id) as $field_id => $field_info) {
-      // filter entity_references which are not base fields
-
+      // Filter entity_references which are not base fields.
       if ($field_info->getType() === 'entity_reference' && !$field_info->getFieldStorageDefinition()
           ->isBaseField() && in_array($field_info->getSettings()['target_type'], $target_types)
       ) {
@@ -215,4 +207,5 @@ class NexxVideo extends MediaTypeBase {
     natsort($bundle_options);
     return $bundle_options;
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\nexx_integration\Form\SettingsForm.
- */
-
 namespace Drupal\nexx_integration\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
@@ -17,7 +12,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 
 /**
+ * Class SettingsForm.
+ *
  * Defines a form that configures nexx video settings.
+ *
+ * @package Drupal\nexx_integration\Form
  */
 class SettingsForm extends ConfigFormBase {
   /**
@@ -40,7 +39,7 @@ class SettingsForm extends ConfigFormBase {
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityManagerInterface $entity_manager){
+  public function __construct(ConfigFactoryInterface $config_factory, EntityManagerInterface $entity_manager) {
     parent::__construct($config_factory);
     $this->entityManager = $entity_manager;
   }
@@ -87,7 +86,7 @@ class SettingsForm extends ConfigFormBase {
     $form['omnia_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Omnia ID'),
-      '#description' => 'The unique identifier of the site, given by nexx.tv.',
+      '#description' => $this->t('The unique identifier of the site, given by nexx.tv.'),
       '#default_value' => $omnia_id,
     ];
 
@@ -198,4 +197,5 @@ class SettingsForm extends ConfigFormBase {
     }
     return $bundle_options;
   }
+
 }

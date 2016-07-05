@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\nexx_integration\Plugin\Field\Widget\NexxVideoInfo.php.
- */
-
 namespace Drupal\nexx_integration\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -13,8 +8,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\CurrentRouteMatch;
-use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -36,7 +29,6 @@ class NexxVideoInfo extends WidgetBase implements ContainerFactoryPluginInterfac
    * @var ConfigFactoryInterface
    */
   protected $configFactory;
-
 
   /**
    * {@inheritdoc}
@@ -92,4 +84,5 @@ class NexxVideoInfo extends WidgetBase implements ContainerFactoryPluginInterfac
     );
     return $element;
   }
+
 }
