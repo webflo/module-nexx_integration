@@ -99,7 +99,7 @@ function nexx_integration_update_8003() {
 /**
  * Add new tags_ids field to nexx field type.
  */
-function nexx_integration_update_8004(&$sandbox) {
+function nexx_integration_update_8004() {
   $messages = [];
   $database = \Drupal::database();
   $database_schema = $database->schema();
@@ -139,7 +139,9 @@ function nexx_integration_update_8004(&$sandbox) {
     }
   }
 
+  $message = '';
   if (!empty($messages)) {
-    return implode('</br>', $messages);
+    $message .= implode('</br>', $messages);
   }
+  return $message;
 }

@@ -87,7 +87,7 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
   $valid_commands = ['update', 'insert', 'delete'];
   if (!in_array($command, $valid_commands)) {
     $logger->error("Invalid command used: @command", array('@command' => $command));
-    return;
+    return $response_data;
   }
 
   /*

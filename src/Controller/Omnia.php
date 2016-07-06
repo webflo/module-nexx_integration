@@ -409,4 +409,5 @@ class Omnia extends ControllerBase {
 
     return $videoField;
   }
+
 }
