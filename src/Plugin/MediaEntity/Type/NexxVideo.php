@@ -98,9 +98,7 @@ class NexxVideo extends MediaTypeBase {
   /**
    * {@inheritdoc}
    */
-  public function getField(MediaInterface $media, $name) {
-    return;
-  }
+  public function getField(MediaInterface $media, $name) {}
 
   /**
    * {@inheritdoc}
@@ -185,7 +183,7 @@ class NexxVideo extends MediaTypeBase {
   /**
    * Builds a list of references for a media entity.
    *
-   * @param $bundle_id
+   * @param int $bundle_id
    *    Entity type to get references for.
    * @param array $target_types
    *    Target types filter.

@@ -29,9 +29,9 @@ function nexx_integration_drush_command() {
 /**
  * Implements the nexx-export-taxonomy drush command.
  *
- * @param (string) $source_vocabulary
+ * @param string $source_vocabulary
  *   The drupal vocabulary to export.
- * @param (string) $destination
+ * @param string $destination
  *   The omnia destination to export to.
  */
 function drush_nexx_integration_nexx_export_taxonomy($source_vocabulary, $destination) {

@@ -2,6 +2,7 @@
 
 /**
  * @file
+ * Contains module hooks.
  */
 
 use Drupal\Core\Entity\EntityInterface;
@@ -174,9 +175,10 @@ function nexx_integration_theme() {
 }
 
 /**
- * Retrieve corresponding nexx id id for a given taxonomy term..
+ * Retrieve corresponding nexx id for a given taxonomy term.
  *
  * @param EntityInterface $term
+ *   The term for which the naxx id should be found.
  *
  * @return int $nexx_id
  *   nexx id for the given Term.

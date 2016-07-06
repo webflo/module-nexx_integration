@@ -34,7 +34,9 @@ class Omnia extends ControllerBase {
   protected $entityTypeBundleInfo;
 
   /**
+   * The media entity.
    *
+   * @var \Drupal\media_entity\MediaInterface
    */
   protected $mediaEntity;
 
@@ -172,7 +174,7 @@ class Omnia extends ControllerBase {
   }
 
   /**
-   *
+   * Get the media entity.
    */
   protected function mediaEntity($id = NULL) {
     if (!isset($this->mediaEntity)) {
@@ -190,7 +192,7 @@ class Omnia extends ControllerBase {
   }
 
   /**
-   *
+   * Map incoming nexx video data to media entity fields.
    */
   protected function mapData(MediaInterface $media, $videoData) {
     $entityType = $this->mediaEntityDefinition();
@@ -240,7 +242,7 @@ class Omnia extends ControllerBase {
 
     // Update taxonomy references.
     if ($channelField && !empty($channel_id)) {
-      $term_id = $this->mapTermID($channel_id);
+      $term_id = $this->mapTermId($channel_id);
       if (!empty($term_id)) {
         $media->$channelField = $term_id;
       }
@@ -254,7 +256,7 @@ class Omnia extends ControllerBase {
     }
 
     if ($actorField && !empty($actor_ids)) {
-      $actor_ids = array_map(array($this, 'mapTermID'), $actor_ids);
+      $actor_ids = array_map(array($this, 'mapTermId'), $actor_ids);
       $media->$actorField = $actor_ids;
     }
 
@@ -270,23 +272,36 @@ class Omnia extends ControllerBase {
   }
 
   /**
+   * Map omnia term Id to corresponding drupal term id.
    *
+   * @param int $omniaId
+   *    The omnia id of the term.
+   *
+   * @return int $nexx_id
+   *    The drupal id of the term.
    */
-  protected function mapTermID($omniaId) {
+  protected function mapTermId($omniaId) {
     $result = $this->database->select('nexx_taxonomy_term_data', 'n')
       ->fields('n', array('tid'))
       ->condition('n.nexx_item_id', $omniaId)
       ->execute();
-    return $result->fetchField();
+    $nexx_id = $result->fetchField();
+    return $nexx_id;
   }
 
   /**
-   * @param $media
-   * @param $teaserImageField
-   * @param $videoData
+   * Map incoming teaser image to medie entity field.
+   *
+   * @param MediaInterface $media
+   *    The media entity.
+   * @param string $teaserImageField
+   *    The machine name of the field, that stores the file.
+   * @param mixed $videoData
+   *    The video data object from the request.
+   *
    * @throws \Exception
    */
-  protected function mapTeaserImage($media, $teaserImageField, $videoData) {
+  protected function mapTeaserImage(MediaInterface $media, $teaserImageField, $videoData) {
     $images_field = $media->$teaserImageField;
     $images_field_target_type = $images_field->getSetting('target_type');
 
@@ -368,7 +383,12 @@ class Omnia extends ControllerBase {
   }
 
   /**
+   * Retrieve video data field name.
    *
+   * @return string $videoField
+   *    The name of the field.
+   *
+   * @throws \Exception
    */
   protected function videoFieldName() {
     $entity_type_id = 'media';
@@ -389,19 +409,4 @@ class Omnia extends ControllerBase {
 
     return $videoField;
   }
-
-  /**
-   *
-   */
-  protected function termId($taxonomy, $name) {
-    return array_shift($this->entityTypeManager()
-      ->getStorage('taxonomy_term')
-      ->loadByProperties([
-        'vid' => $taxonomy,
-        'name' => trim($name),
-      ]
-      )
-    );
-  }
-
 }
