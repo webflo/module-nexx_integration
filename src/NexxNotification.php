@@ -18,21 +18,29 @@ use GuzzleHttp\Exception\RequestException;
 class NexxNotification implements NexxNotificationInterface {
 
   /**
+   * The entity storage object for taxonomy terms.
+   *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $termStorage;
 
   /**
+   * The entity query object for taxonomy terms.
+   *
    * @var \Drupal\Core\Entity\Query\QueryInterface
    */
   protected $nodeQuery;
 
   /**
+   * The config factory service.
+   *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
   protected $config;
 
   /**
+   * The config factory service.
+   *
    * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
@@ -51,13 +59,13 @@ class NexxNotification implements NexxNotificationInterface {
    * or when a video has been created.
    *
    * @param EntityTypeManagerInterface $entity_type_manager
-   *   The entity query object for taxonomy terms.
+   *   The entity type manager.
    * @param QueryFactory $query
    *   The entity query object for taxonomy terms.
    * @param ConfigFactoryInterface $config_factory
    *   The config factory service.
    * @param LoggerChannelFactory $logger
-   *   The logger service.
+   *   The config factory service.
    * @param Client $http_client
    *   The HTTP client.
    */
@@ -78,7 +86,7 @@ class NexxNotification implements NexxNotificationInterface {
   /**
    * {@inheritdoc}
    */
-  function insert($streamtype, $reference_number, $values) {
+  public function insert($streamtype, $reference_number, $values) {
     if ($streamtype === 'video') {
       throw new \InvalidArgumentException(sprintf('Streamtype cannot be "%s" in insert operation.', $streamtype));
     }
@@ -95,7 +103,7 @@ class NexxNotification implements NexxNotificationInterface {
   /**
    * {@inheritdoc}
    */
-  function update($streamtype, $reference_number, $values) {
+  public function update($streamtype, $reference_number, $values) {
     $response = $this->notificateNexx($streamtype, $reference_number, 'update', $values);
     $this->logger->info("update @type. Reference number: @reference, values: @values", array(
       '@type' => $streamtype,
@@ -109,7 +117,7 @@ class NexxNotification implements NexxNotificationInterface {
   /**
    * {@inheritdoc}
    */
-  function delete($streamtype, $reference_number, $values) {
+  public function delete($streamtype, $reference_number, $values) {
     if ($streamtype === 'video') {
       throw new \InvalidArgumentException(sprintf('Streamtype cannot be "%s" in delete operation.', $streamtype));
     }
@@ -131,7 +139,7 @@ class NexxNotification implements NexxNotificationInterface {
    *   - "actor"
    *   - "channel"
    *   - "tag"
-   *   - "video"
+   *   - "video".
    * @param string $reference_number
    *   Reference id. In case of streamtype video, this is the nexx ID in all
    *   other cases, this is the corresponding drupal id.
@@ -139,9 +147,12 @@ class NexxNotification implements NexxNotificationInterface {
    *   CRUD operation. Possible values are:
    *   - "insert"
    *   - "update"
-   *   - "delete"
+   *   - "delete".
    * @param string[] $values
    *   The values to be set.
+   *
+   * @return string[] $response_data
+   *   Decoded response.
    */
   protected function notificateNexx(
     $streamtype,
@@ -168,8 +179,13 @@ class NexxNotification implements NexxNotificationInterface {
       $options = array(
         'form_params' => $data,
       );
-
-      // $this->logger->debug("Send http POST request to @url with option: @options", ['@url' => $api_url, '@options' => print_r($options, TRUE)]);.
+      /*
+      $this->logger->debug("Send http request to @url with option: @options",
+      [
+      '@url' => $api_url,
+      '@options' => print_r($options, TRUE),
+      ]);
+       */
       $response = $this->httpClient->request('POST', $api_url, $options);
       $response_data = Json::decode($response->getBody()->getContents());
 

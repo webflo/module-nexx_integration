@@ -72,15 +72,9 @@ function nexx_integration_taxonomy_term_delete(EntityInterface $term) {
 }
 
 /**
- * Implements hook_taxonomy_term_request().
+ * Implements and extends hook_taxonomy_term_request().
  *
- * @param \Drupal\Core\Entity\EntityInterface $term
- *   The term to create / modify / delete at nexxOMNIA.
- * @param string $command
- *   The command to perform. Valid values are:
- *     - create
- *     - update
- *     - delete.
+ * Additionally to the default hook parameters two internal params are added.
  */
 function nexx_integration_taxonomy_term_request(EntityInterface $term, $command, $additional_params = []) {
   $term_bundle = $term->bundle();
@@ -88,7 +82,7 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
   $entity_type_manager = \Drupal::entityTypeManager();
   $nexx_notification = $container->get('nexx_integration.notification');
   $logger = $container->get('logger.factory')->get('nexx_integration');
-
+  $response_data = [];
   $valid_commands = ['update', 'insert', 'delete'];
   if (!in_array($command, $valid_commands)) {
     $logger->error("Invalid command used: @command", array('@command' => $command));
@@ -96,6 +90,7 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
   }
 
   /*
+   * Find media bundles, that have a setting for this vocabulary
    * Find media bundles, that have a setting for this vocabulary
    */
   foreach ($container->get('entity_type.bundle.info')
@@ -124,28 +119,32 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
        *
        * Prepare for this by removing the hard coded names.
        */
-      if (in_array($term_bundle, $channel_field_settings['target_bundles'])) {
+      if (isset($channel_field_settings['target_bundles']) && in_array($term_bundle, $channel_field_settings['target_bundles'])) {
         $streamtype = "channel";
         $params = ['title' => $term->label()] + $additional_params;
 
         // Omnia knows the concept of parents for the channel taxonomy
         // But only one parent per term is allowed. Drupal allows multiple
-        // parents per term, so we use only the first term for mapping
+        // parents per term, so we use only the first term for mapping.
         $parents = $entity_type_manager->getStorage('taxonomy_term')->loadParents($term->id());
-        if($parents) {
+        if ($parents) {
           $params['parent'] = array_shift($parents)->id();
         }
       }
-      elseif (in_array($term_bundle, $actors_field_settings['target_bundles'])) {
+      elseif (isset($actors_field_settings['target_bundles']) && in_array($term_bundle, $actors_field_settings['target_bundles'])) {
         $streamtype = "actor";
         $params = ['artistname' => $term->label()] + $additional_params;
       }
-      elseif (in_array($term_bundle, $tags_field_settings['target_bundles'])) {
+      elseif (isset($tags_field_settings['target_bundles']) && in_array($term_bundle, $tags_field_settings['target_bundles'])) {
         $streamtype = "tag";
         $params = ['tag' => $term->label()] + $additional_params;
       }
-
-      $response_data = $nexx_notification->$command($streamtype, $term->id(), $params);
+      if (!empty($streamtype)) {
+        $response_data = $nexx_notification->$command($streamtype, $term->id(), $params);
+      }
+      else {
+        $logger->info("No configured taxonomy found, skipping omnia sync");
+      }
       break;
     }
   }
@@ -175,11 +174,12 @@ function nexx_integration_theme() {
 }
 
 /**
- * Implements hook_taxonomy_term_nexx_id().
+ * Retrieve corresponding nexx id id for a given taxonomy term..
  *
- * @param \Drupal\Core\Entity\EntityInterface $term
+ * @param EntityInterface $term
  *
- * @return array
+ * @return int $nexx_id
+ *   nexx id for the given Term.
  */
 function nexx_integration_taxonomy_term_nexx_id(EntityInterface $term) {
   $database = \Drupal::getContainer()->get('database');
@@ -187,21 +187,24 @@ function nexx_integration_taxonomy_term_nexx_id(EntityInterface $term) {
     ->fields('n', array('nexx_item_id'))
     ->condition('n.tid', $term->id())
     ->execute();
-  return $result->fetchField();
+  $nexx_id = $result->fetchField();
+  return $nexx_id;
 }
 
 /**
  * Update nexx term id mapping table.
  *
- * @param $drupal_id The drupal tid of the term.
- * @param $nexx_id The nexx id of the same term
+ * @param int $drupal_id
+ *   The drupal tid of the term.
+ * @param int $nexx_id
+ *   The nexx id of the same term.
  */
 function update_nexx_term_id_mapping($drupal_id, $nexx_id) {
   $database = \Drupal::getContainer()->get('database');
   $database->merge('nexx_taxonomy_term_data')->key([
-    'tid' => $drupal_id
+    'tid' => $drupal_id,
   ])->fields([
     'tid' => $drupal_id,
-    'nexx_item_id' => $nexx_id
+    'nexx_item_id' => $nexx_id,
   ])->execute();
 }
