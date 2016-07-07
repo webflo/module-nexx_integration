@@ -110,8 +110,8 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
       if (!empty($configuration['actor_field'])) {
         $actors_field_settings = $field_definitions[$configuration['actor_field']]->getSetting('handler_settings');
       }
-      if (!empty($configuration['tags_field'])) {
-        $tags_field_settings = $field_definitions[$configuration['tags_field']]->getSetting('handler_settings');
+      if (!empty($configuration['tag_field'])) {
+        $tags_field_settings = $field_definitions[$configuration['tag_field']]->getSetting('handler_settings');
       }
 
       /*
@@ -129,7 +129,8 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
         // parents per term, so we use only the first term for mapping.
         $parents = $entity_type_manager->getStorage('taxonomy_term')->loadParents($term->id());
         if ($parents) {
-          $params['parent'] = array_shift($parents)->id();
+          $parent = array_shift($parents);
+          $params['parent'] = nexx_integration_taxonomy_term_nexx_id($parent);
         }
       }
       elseif (isset($actors_field_settings['target_bundles']) && in_array($term_bundle, $actors_field_settings['target_bundles'])) {

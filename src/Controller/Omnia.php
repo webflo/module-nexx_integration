@@ -201,7 +201,8 @@ class Omnia extends ControllerBase {
     $labelKey = $entityType->getKey('label');
 
     $title = !empty($videoData->itemData->title) ? $videoData->itemData->title : '';
-    $actor_ids = !empty($videoData->itemData->actors_ids) ? explode(',', $videoData->itemData->actors_ids) : "";
+    $actor_ids = !empty($videoData->itemData->actors_ids) ? explode(',', $videoData->itemData->actors_ids) : [];
+    $tag_ids = !empty($videoData->itemData->tags_ids) ? explode(',', $videoData->itemData->tags_ids) : [];
     $channel_id = !empty($videoData->itemData->channel_id) ? $videoData->itemData->channel_id : 0;
 
     $media->$videoField->item_id = !empty($videoData->itemID) ? $videoData->itemID : 0;
@@ -238,6 +239,7 @@ class Omnia extends ControllerBase {
     $media_config = $media->getType()->getConfiguration();
     $channelField = $media_config['channel_field'];
     $actorField = $media_config['actor_field'];
+    $tagField = $media_config['tag_field'];
     $teaserImageField = $media_config['teaser_image_field'];
 
     // Update taxonomy references.
@@ -258,6 +260,11 @@ class Omnia extends ControllerBase {
     if ($actorField && !empty($actor_ids)) {
       $actor_ids = array_map(array($this, 'mapTermId'), $actor_ids);
       $media->$actorField = $actor_ids;
+    }
+
+    if ($tagField && !empty($tag_ids)) {
+      $tag_ids = array_map(array($this, 'mapTermId'), $tag_ids);
+      $media->$tagField = $tag_ids;
     }
 
     if ($teaserImageField && $media->$videoField->thumb !== $videoData->itemData->thumb) {
