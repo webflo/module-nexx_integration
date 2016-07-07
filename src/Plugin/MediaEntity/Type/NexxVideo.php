@@ -141,7 +141,7 @@ class NexxVideo extends MediaTypeBase {
     $default_bundle = !empty($values['channel_field']) ? $values['channel_field'] : $this->configuration['channel_field'];
     $form['channel_field'] = [
       '#type' => 'select',
-      '#title' => 'Channel ' . $bundle->label() ?: $this->t('Fields'),
+      '#title' => $this->t('Channel taxonomy field mapping'),
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => $default_bundle,
@@ -151,7 +151,7 @@ class NexxVideo extends MediaTypeBase {
     $default_bundle = !empty($values['actor_field']) ? $values['actor_field'] : $this->configuration['actor_field'];
     $form['actor_field'] = [
       '#type' => 'select',
-      '#title' => 'Actor ' . $bundle->label() ?: $this->t('Fields'),
+      '#title' => $this->t('Actor taxonomy field mapping'),
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => $default_bundle,
@@ -161,7 +161,7 @@ class NexxVideo extends MediaTypeBase {
     $default_bundle = !empty($values['tag_field']) ? $values['tag_field'] : $this->configuration['tag_field'];
     $form['tag_field'] = [
       '#type' => 'select',
-      '#title' => 'Tag ' . $bundle->label() ?: $this->t('Fields'),
+      '#title' => $this->t('Tag taxonomy field mapping'),
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => $default_bundle,
@@ -171,7 +171,7 @@ class NexxVideo extends MediaTypeBase {
     $default_bundle = !empty($values['teaser_image_field']) ? $values['teaser_image_field'] : $this->configuration['teaser_image_field'];
     $form['teaser_image_field'] = [
       '#type' => 'select',
-      '#title' => 'Teaser image ' . $bundle->label() ?: $this->t('Fields'),
+      '#title' => $this->t('Teaser image field mapping'),
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['media']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => $default_bundle,

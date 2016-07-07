@@ -110,8 +110,8 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
       if (!empty($configuration['actor_field'])) {
         $actors_field_settings = $field_definitions[$configuration['actor_field']]->getSetting('handler_settings');
       }
-      if (!empty($configuration['tags_field'])) {
-        $tags_field_settings = $field_definitions[$configuration['tags_field']]->getSetting('handler_settings');
+      if (!empty($configuration['tag_field'])) {
+        $tags_field_settings = $field_definitions[$configuration['tag_field']]->getSetting('handler_settings');
       }
 
       /*
