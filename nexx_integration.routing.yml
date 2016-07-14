@@ -8,13 +8,10 @@ nexx_integration.admin_settings:
 
 nexx_integration.omnia_notification_gateway:
   path: '/service/omnia/video'
-  options:
-    _auth: [ 'basic_auth' ]
-  requirements:
-    _user_is_logged_in: 'TRUE'
-    _permission: 'use omnia notification gateway'
   defaults:
     _controller: '\Drupal\nexx_integration\Controller\OmniaController::video'
+  requirements:
+    _permission: 'access content'
 
 nexx_integration.list:
   path: '/admin/content/nexx'

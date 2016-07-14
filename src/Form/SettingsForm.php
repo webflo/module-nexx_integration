@@ -108,7 +108,47 @@ class SettingsForm extends ConfigFormBase {
       '#description' => $this->t('The bundle which is used for videos.'),
     );
     $form['type_settings']['bundles']['#access'] = !empty($form['bundles']['#options']);
+
+
+    $form['notification_settings'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Notification settings'),
+    ];
+    $form['notification_settings']['notification_access_key'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('DCX notification access key'),
+      '#default_value' => $settings->get('notification_access_key'),
+      '#size' => 25,
+    ];
+    // Add a submit handler function for the key generation.
+    $form['notification_settings']['create_key'][] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Generate new random key'),
+      '#submit' => ['::generateRandomKey'],
+      // No validation at all is required in the equivocate case, so
+      // we include this here to make it skip the form-level validator.
+      '#validate' => array(),
+    ];
+
+
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Form submission handler for the random key generation.
+   *
+   * This only fires when the 'Generate new random key' button is clicked.
+   *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function generateRandomKey(array &$form, FormStateInterface $form_state) {
+    $config = $this->config('nexx_integration.settings');
+    $config->set('notification_access_key', substr(md5(rand()), 0, 20));
+    $config->save();
+    parent::submitForm($form, $form_state);
   }
 
   /**

@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Class Omnia.
@@ -131,9 +132,22 @@ class OmniaController extends ControllerBase {
    * Endpoint for video creation / update.
    */
   public function video(Request $request) {
+
     $response = new JsonResponse();
     $content = $request->getContent();
     $query = $this->mediaEntityStorage()->getQuery();
+
+    $token = $request->query->get('token', NULL);
+    if (NULL !== $token) {
+
+      $config = $this->config('nexx_integration.settings');
+      if ($token != $config->get('notification_access_key')) {
+        throw new AccessDeniedHttpException();
+      }
+    }
+    else {
+      throw new AccessDeniedHttpException();
+    }
 
     if (!empty($content)) {
       $videoData = json_decode($content);
