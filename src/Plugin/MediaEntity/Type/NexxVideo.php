@@ -98,8 +98,110 @@ class NexxVideo extends MediaTypeBase {
   /**
    * {@inheritdoc}
    */
-  public function getField(MediaInterface $media, $name) {}
+  public function getField(MediaInterface $media, $name) {
+    $video_field = $this->getVideoField($media);
 
+    if (empty($video_field)) {
+      return FALSE;
+    }
+    switch ($name) {
+      case 'nexx_item_id':
+        if (!empty($media->{$video_field}->item_id)) {
+          return $media->{$video_field}->item_id;
+        }
+        break;
+
+      case 'is_ssc':
+        if (!empty($media->{$video_field}->isSSC)) {
+          return $media->{$video_field}->isSSC;
+        }
+        break;
+
+      case 'encoded_ssc':
+        if (!empty($media->{$video_field}->encodedSSC)) {
+          return $media->{$video_field}->encodedSSC;
+        }
+        break;
+
+      case 'encoded_html5':
+        if (!empty($media->{$video_field}->encodedHTML5)) {
+          return $media->{$video_field}->encodedHTML5;
+        }
+        break;
+
+      case 'is_mobile':
+        if (!empty($media->{$video_field}->isMOBILE)) {
+          return $media->{$video_field}->isMOBILE;
+        }
+        break;
+
+      case 'encoded_mobile':
+        if (!empty($media->{$video_field}->encodedMOBILE)) {
+          return $media->{$video_field}->encodedMOBILE;
+        }
+        break;
+
+      case 'is_hyve':
+        if (!empty($media->{$video_field}->isHYVE)) {
+          return $media->{$video_field}->isHYVE;
+        }
+        break;
+
+      case 'encoded_hyve':
+        if (!empty($media->{$video_field}->encodedHYVE)) {
+          return $media->{$video_field}->encodedHYVE;
+        }
+        break;
+
+      case 'deleted':
+        if (!empty($media->{$video_field}->isDeleted)) {
+          return $media->{$video_field}->isDeleted;
+        }
+        break;
+
+      case 'blocked':
+        if (!empty($media->{$video_field}->isBlocked)) {
+          return $media->{$video_field}->isBlocked;
+        }
+        break;
+
+      default:
+        if (!empty($media->{$video_field}->{$name})) {
+          return $media->{$video_field}->{$name};
+        }
+
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Retrieve video field name.
+   *
+   * @param MediaInterface $media
+   *    The media object for which the field should be retrieved.
+   *
+   * @return string $videoField
+   *    The fieldname of the video field;
+   *
+   * @throws \Exception
+   */
+  public function getVideoField(MediaInterface $media) {
+    $fieldDefinitions = $media->getFieldDefinitions();
+    foreach ($fieldDefinitions as $field_name => $fieldDefinition) {
+      if ($fieldDefinition->getType() === 'nexx_video_data') {
+        $videoField = $field_name;
+        break;
+      }
+    }
+
+    if (empty($videoField)) {
+      throw new \Exception('No video data field defined');
+    }
+
+    return $videoField;
+  }
+  
   /**
    * {@inheritdoc}
    */

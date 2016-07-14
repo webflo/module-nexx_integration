@@ -14,11 +14,11 @@ nexx_integration.omnia_notification_gateway:
     _user_is_logged_in: 'TRUE'
     _permission: 'use omnia notification gateway'
   defaults:
-    _controller: '\Drupal\nexx_integration\Controller\Omnia::video'
+    _controller: '\Drupal\nexx_integration\Controller\OmniaController::video'
 
 nexx_integration.list:
   path: '/admin/content/nexx'
   defaults:
-    _controller: '\Drupal\nexx_integration\Controller\Omnia::videoList'
+    _controller: '\Drupal\nexx_integration\Controller\OmniaController::videoList'
   requirements:
     _permission: 'edit content'

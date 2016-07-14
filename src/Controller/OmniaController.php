@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  *
  * @package Drupal\nexx_integration\Controller
  */
-class Omnia extends ControllerBase {
+class OmniaController extends ControllerBase {
   /**
    * The database service.
    *
@@ -257,14 +257,14 @@ class Omnia extends ControllerBase {
       }
     }
 
-    if ($actorField && !empty($actor_ids)) {
-      $actor_ids = array_map(array($this, 'mapTermId'), $actor_ids);
-      $media->$actorField = $actor_ids;
+    if ($actorField) {
+      $mapped_actor_ids = $this->mapMultipleTermIds($actor_ids);
+      $media->$actorField = $mapped_actor_ids;
     }
 
-    if ($tagField && !empty($tag_ids)) {
-      $tag_ids = array_map(array($this, 'mapTermId'), $tag_ids);
-      $media->$tagField = $tag_ids;
+    if ($tagField) {
+      $mapped_tag_ids = $this->mapMultipleTermIds($tag_ids);
+      $media->$tagField = $mapped_tag_ids;
     }
 
     if ($teaserImageField && $media->$videoField->thumb !== $videoData->itemData->thumb) {
@@ -279,21 +279,50 @@ class Omnia extends ControllerBase {
   }
 
   /**
+   * Map multiple omnia term ids to drupal term ids.
+   *
+   * @param int[] $omnia_ids
+   *    Array of omnia termn ids.
+   *
+   * @return int[] $drupal_ids
+   *    Array of mapped drupal ids, might contain less ids then the input array.
+   */
+  protected function mapMultipleTermIds($omnia_ids) {
+    $drupal_ids = [];
+    foreach ($omnia_ids as $omnia_id) {
+      $drupalId = $this->mapTermId($omnia_id);
+      if ($drupalId) {
+        $drupal_ids[] = $drupalId;
+      }
+      else {
+        $this->logger->warning('Unknown omnia ID @term_id"', array(
+          '@term_id' => $omnia_id,
+        )
+        );
+      }
+    }
+
+    return $drupal_ids;
+  }
+
+  /**
    * Map omnia term Id to corresponding drupal term id.
    *
-   * @param int $omniaId
+   * @param int $omnia_id
    *    The omnia id of the term.
    *
-   * @return int $nexx_id
+   * @return int $drupalId
    *    The drupal id of the term.
    */
-  protected function mapTermId($omniaId) {
+  protected function mapTermId($omnia_id) {
     $result = $this->database->select('nexx_taxonomy_term_data', 'n')
       ->fields('n', array('tid'))
-      ->condition('n.nexx_item_id', $omniaId)
+      ->condition('n.nexx_item_id', $omnia_id)
       ->execute();
-    $nexx_id = $result->fetchField();
-    return $nexx_id;
+
+    $drupal_id = $result->fetchField();
+
+    return $drupal_id;
   }
 
   /**
