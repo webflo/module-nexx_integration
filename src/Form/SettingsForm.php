@@ -116,7 +116,7 @@ class SettingsForm extends ConfigFormBase {
     ];
     $form['notification_settings']['notification_access_key'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('DCX notification access key'),
+      '#title' => $this->t('NEXX notification access key'),
       '#default_value' => $settings->get('notification_access_key'),
       '#size' => 25,
     ];
