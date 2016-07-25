@@ -34,6 +34,10 @@ class NexxVideoData extends FieldItemBase {
           'type' => 'varchar',
           'length' => 256,
         ),
+        'hash' => array(
+          'type' => 'varchar',
+          'length' => 16,
+        ),
         'subtitle' => array(
           'type' => 'varchar',
           'length' => 256,
@@ -174,6 +178,8 @@ class NexxVideoData extends FieldItemBase {
       ->setLabel(t('Nexx item ID'));
     $properties['title'] = DataDefinition::create('string')
       ->setLabel(t('Title'));
+    $properties['hash'] = DataDefinition::create('string')
+      ->setLabel(t('Video hash'));
     $properties['thumb'] = DataDefinition::create('string')
       ->setLabel(t('Thumbnail URL'));
     $properties['subtitle'] = DataDefinition::create('string')

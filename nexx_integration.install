@@ -199,3 +199,57 @@ function nexx_integration_update_8005() {
   }
   return $message;
 }
+
+
+/**
+ * Add new hash field to nexx field type.
+ */
+function nexx_integration_update_8006() {
+  $messages = [];
+  $database = \Drupal::database();
+  $database_schema = $database->schema();
+  $entity_types = \Drupal::entityTypeManager()->getDefinitions();
+  $schema = \Drupal::keyValue('entity.storage_schema.sql')->getAll();
+
+  foreach ($schema as $item_name => $item) {
+    list($entity_type_id, , $field_name) = explode('.', $item_name);
+
+    // Basic sanity check.
+    if (!isset($entity_types[$entity_type_id])) {
+      continue;
+    }
+    foreach ($item as $table_name => $table_schema) {
+      foreach ($table_schema as $schema_key => $schema_data) {
+        if ($schema_key === 'fields') {
+          // Test if field schema contains a known nexx property.
+          // TODO: investigate how to properly determine,
+          // if we are dealing with a nexx field.
+          $existing_field_property = $field_name . '_encodedSSC';
+          $new_field_properties = array($field_name . '_hash');
+
+          if (isset($schema_data[$existing_field_property])) {
+            foreach ($new_field_properties as $new_field_property) {
+              // This is the actual update, adding the new field.
+              if ($database_schema->tableExists($table_name) && !$database_schema->fieldExists($table_name, $new_field_property)) {
+                $messages[] = t('Updating nexx field @field in table @table', array(
+                  '@field' => $field_name,
+                  '@table' => $table_name,
+                ));
+                $database_schema->addField($table_name, $new_field_property, [
+                  'type' => 'varchar',
+                  'length' => 256,
+                ]);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  $message = '';
+  if (!empty($messages)) {
+    $message .= implode('</br>', $messages);
+  }
+  return $message;
+}

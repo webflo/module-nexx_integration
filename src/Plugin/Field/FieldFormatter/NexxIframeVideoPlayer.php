@@ -11,18 +11,18 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Plugin implementation of the 'nexx_video_player' formatter.
+ * Plugin implementation of the 'nexx_iframe_video_player' formatter.
  *
  * @FieldFormatter(
- *   id = "nexx_video_player",
+ *   id = "nexx_iframe_video_player",
  *   module = "nexx_integration",
- *   label = @Translation("Javascript Video Player"),
+ *   label = @Translation("Iframe Video Player"),
  *   field_types = {
  *     "nexx_video_data"
  *   }
  * )
  */
-class NexxVideoPlayer extends FormatterBase implements ContainerFactoryPluginInterface {
+class NexxIframeVideoPlayer extends FormatterBase implements ContainerFactoryPluginInterface {
 
   /**
    * The nexx configuration object.
@@ -80,10 +80,11 @@ class NexxVideoPlayer extends FormatterBase implements ContainerFactoryPluginInt
     $elements = [];
 
     foreach ($items as $delta => $item) {
+
       $elements[$delta] = [
-        '#theme' => 'nexx_player',
+        '#theme' => 'iframe_nexx_player',
         '#omnia_id' => $this->config->get('omnia_id'),
-        '#video_id' => $item->item_id,
+        '#video_hash' => $item->hash,
         '#container_id' => 'player--' . Crypt::randomBytesBase64(8),
         '#attached' => array(
           'library' => array(

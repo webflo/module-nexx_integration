@@ -166,6 +166,14 @@ function nexx_integration_theme() {
       ),
       'template' => 'nexx-player',
     ),
+    'iframe_nexx_player' => array(
+      'variables' => array(
+        'video_hash' => NULL,
+        'omnia_id' => NULL,
+        'container_id' => NULL,
+      ),
+      'template' => 'iframe-nexx-player',
+    ),
     'omnia_editor' => array(
       'variables' => array(
         'auth_key' => NULL,

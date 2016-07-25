@@ -221,6 +221,7 @@ class OmniaController extends ControllerBase {
 
     $media->$videoField->item_id = !empty($videoData->itemID) ? $videoData->itemID : 0;
     $media->$videoField->title = $title;
+    $media->$videoField->hash = !empty($videoData->itemData->hash) ? $videoData->itemData->hash : '';
     $media->$videoField->alttitle = !empty($videoData->itemData->alttitle) ? $videoData->itemData->alttitle : '';
     $media->$videoField->subtitle = !empty($videoData->itemData->subtitle) ? $videoData->itemData->subtitle : '';
     $media->$videoField->teaser = !empty($videoData->itemData->teaser) ? $videoData->itemData->teaser : '';

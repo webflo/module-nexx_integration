@@ -72,6 +72,7 @@ class NexxVideo extends MediaTypeBase {
   public function providedFields() {
     return [
       'nexx_item_id' => 'Nexx item ID.',
+      'hash' => 'Video hash',
       'subtitle' => 'The subtitle.',
       'teaser' => 'The teaser.',
       'description' => 'The description.',
