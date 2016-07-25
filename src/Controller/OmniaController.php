@@ -179,7 +179,7 @@ class OmniaController extends ControllerBase {
       '@id' => $media->id(),
     )
     );
-    $response->setdata([
+    $response->setData([
       'refnr' => $videoData->itemID,
       'value' => $media->id(),
     ]
@@ -246,6 +246,8 @@ class OmniaController extends ControllerBase {
     $media->$videoField->isDeleted = !empty($videoData->itemStates->isDeleted) ? $videoData->itemStates->isDeleted : 0;
     $media->$videoField->isBlocked = !empty($videoData->itemStates->isBlocked) ? $videoData->itemStates->isBlocked : 0;
     $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : 0;
+    $media->$videoField->copyright = !empty($videoData->itemData->copyright) ? $videoData->itemData->copyright : '';
+    $media->$videoField->runtime = !empty($videoData->itemData->runtime) ? $videoData->itemData->runtime : '00:00:00';
 
     // Copy title to label field.
     $media->$labelKey = $title;
@@ -288,6 +290,13 @@ class OmniaController extends ControllerBase {
       }
       else {
         $media->$videoField->thumb = '';
+      }
+    }
+
+    // media entity does not update mapped fields by itself
+    foreach ($media->bundle->entity->field_map as $source_field => $destination_field) {
+      if ($media->hasField($destination_field) && ($value = $media->getType()->getField($media, $source_field))) {
+        $media->set($destination_field, $value);
       }
     }
   }

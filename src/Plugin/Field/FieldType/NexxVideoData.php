@@ -145,6 +145,14 @@ class NexxVideoData extends FieldItemBase {
           'type' => 'varchar',
           'length' => 256,
         ),
+        'copyright' => array(
+          'type' => 'varchar',
+          'length' => 256,
+        ),
+        'runtime' => array(
+          'type' => 'varchar',
+          'length' => 8,
+        ),
       ),
     );
   }
@@ -220,7 +228,10 @@ class NexxVideoData extends FieldItemBase {
       ->setLabel(t('Is blocked'));
     $properties['encodedTHUMBS'] = DataDefinition::create('boolean')
       ->setLabel(t('Encoded thumbs'));
-
+    $properties['copyright'] = DataDefinition::create('string')
+      ->setLabel(t('Copyright'));
+    $properties['runtime'] = DataDefinition::create('string')
+      ->setLabel(t('Runtime'));
     return $properties;
   }
 
