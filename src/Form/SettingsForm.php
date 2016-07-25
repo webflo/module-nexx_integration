@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 
@@ -65,6 +66,9 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    global $base_url;
+
+
     $values = $form_state->getValues();
     $settings = $this->config('nexx_integration.settings');
 
@@ -129,7 +133,13 @@ class SettingsForm extends ConfigFormBase {
       // we include this here to make it skip the form-level validator.
       '#validate' => array(),
     ];
-
+    $form['info'][] = [
+      '#markup' => '<p>' . $this->t('The current value to provide in omnia domain settings for the video endpoint is:<br><strong>:endpoint</strong>',
+        array(
+          ':endpoint' => $base_url . Url::fromRoute('nexx_integration.omnia_notification_gateway')->toString() . '?token=' . $settings->get('notification_access_key')
+        )
+      ) . '</p>',
+    ];
 
     return parent::buildForm($form, $form_state);
   }
