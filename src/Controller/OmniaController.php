@@ -258,6 +258,7 @@ class OmniaController extends ControllerBase {
     $actorField = $media_config['actor_field'];
     $tagField = $media_config['tag_field'];
     $teaserImageField = $media_config['teaser_image_field'];
+    $descriptionField = $media_config['description_field'];
 
     // Update taxonomy references.
     if ($channelField && !empty($channel_id)) {
@@ -292,6 +293,11 @@ class OmniaController extends ControllerBase {
       else {
         $media->$videoField->thumb = '';
       }
+    }
+
+    // map the description
+    if($descriptionField) {
+      $media->$descriptionField = $videoData->itemData->description;
     }
 
     // media entity does not update mapped fields by itself

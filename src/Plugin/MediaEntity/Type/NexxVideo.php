@@ -75,7 +75,6 @@ class NexxVideo extends MediaTypeBase {
       'hash' => 'Video hash',
       'subtitle' => 'The subtitle.',
       'teaser' => 'The teaser.',
-      'description' => 'The description.',
       'uploaded' => 'Time of upload.',
       'copyright' => 'Copyright information.',
       'is_ssc' => 'Is SSC.',
@@ -253,16 +252,23 @@ class NexxVideo extends MediaTypeBase {
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => empty($this->configuration['channel_field']) ? NULL : $this->configuration['channel_field'],
-      '#description' => $this->t('The taxonomy which is used for videos. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
+      '#description' => $this->t('The taxonomy which is used for videos. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding taxonomy term entity references to the bundle.'),
     ];
-    
+    $form['description_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Description field mapping'),
+      '#options' => $this->getTextfields($bundle->id()),
+      '#empty_option' => $this->t('Select field'),
+      '#default_value' => empty($this->configuration['description_field']) ? NULL : $this->configuration['description_field'],
+      '#description' => $this->t('The field where descriptions are stored. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding text fields to the bundle.'),
+    ];
     $form['actor_field'] = [
       '#type' => 'select',
       '#title' => $this->t('Actor taxonomy field mapping'),
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => empty($this->configuration['actor_field']) ? NULL : $this->configuration['actor_field'],
-      '#description' => $this->t('The taxonomy which is used for actors. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
+      '#description' => $this->t('The taxonomy which is used for actors. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding taxonomy term entity references to the bundle.'),
     ];
 
     $form['tag_field'] = [
@@ -271,7 +277,7 @@ class NexxVideo extends MediaTypeBase {
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => empty($this->configuration['tag_field']) ? NULL : $this->configuration['tag_field'],
-      '#description' => $this->t('The taxonomy which is used for tags. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding taxonomy term entity references to the bundle.'),
+      '#description' => $this->t('The taxonomy which is used for tags. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding taxonomy term entity references to the bundle.'),
     ];
 
     $form['teaser_image_field'] = [
@@ -280,7 +286,7 @@ class NexxVideo extends MediaTypeBase {
       '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['media']),
       '#empty_option' => $this->t('Select field'),
       '#default_value' => empty($this->configuration['teaser_image_field']) ? NULL : $this->configuration['teaser_image_field'],
-      '#description' => $this->t('The field which is used for the teaser image. You can create a bundle without selecting a value for this dropdown initially. This dropdown can be populated after adding media fields to the bundle.'),
+      '#description' => $this->t('The field which is used for the teaser image. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding media fields to the bundle.'),
     ];
     return $form;
   }
@@ -311,4 +317,31 @@ class NexxVideo extends MediaTypeBase {
     return $bundle_options;
   }
 
+
+  /**
+   * Builds a list of text fields of a media entity.
+   *
+   * @param int $bundle_id
+   *    Entity type to get references for.
+   *
+   * @return array
+   *   An array of field labels, keyed by field name.
+   */
+  protected function getTextfields($bundle_id) {
+    $bundle_options = array();
+
+    foreach ($this->entityFieldManager->getFieldDefinitions('media', $bundle_id) as $field_id => $field_info) {
+      // Filter long text fields which are not base fields.
+      $types = ['text_long', 'text_with_summary', 'string_long'];
+
+      if (in_array($field_info->getType(), $types) && !$field_info->getFieldStorageDefinition()
+          ->isBaseField()
+      ) {
+        $bundle_options[$field_id] = $field_info->getLabel();
+      }
+
+    }
+    natsort($bundle_options);
+    return $bundle_options;
+  }
 }

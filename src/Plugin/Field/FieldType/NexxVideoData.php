@@ -50,14 +50,6 @@ class NexxVideoData extends FieldItemBase {
           'type' => 'varchar',
           'length' => 256,
         ),
-        'description' => array(
-          'type' => 'varchar',
-          'length' => 256,
-        ),
-        'altdescription' => array(
-          'type' => 'varchar',
-          'length' => 256,
-        ),
         'uploaded' => array(
           'type' => 'int',
         ),
@@ -188,10 +180,6 @@ class NexxVideoData extends FieldItemBase {
       ->setLabel(t('Alternative title'));
     $properties['teaser'] = DataDefinition::create('string')
       ->setLabel(t('Teaser'));
-    $properties['description'] = DataDefinition::create('string')
-      ->setLabel(t('Description'));
-    $properties['altdescription'] = DataDefinition::create('string')
-      ->setLabel(t('Alternative description'));
     $properties['uploaded'] = DataDefinition::create('timestamp')
       ->setLabel(t('Time of upload'));
     $properties['channel_id'] = DataDefinition::create('integer')
