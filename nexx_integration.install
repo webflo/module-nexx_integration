@@ -253,3 +253,63 @@ function nexx_integration_update_8006() {
   }
   return $message;
 }
+
+/**
+ * Remove description fields.
+ */
+function nexx_integration_update_8007() {
+  $messages = [];
+  $database = \Drupal::database();
+  $database_schema = $database->schema();
+  $entity_types = \Drupal::entityTypeManager()->getDefinitions();
+  $schema_key_value = \Drupal::keyValue('entity.storage_schema.sql');
+  $schema = $schema_key_value->getAll();
+
+  foreach ($schema as $item_name => $item) {
+    list($entity_type_id, , $field_name) = explode('.', $item_name);
+
+    // Basic sanity check.
+    if (!isset($entity_types[$entity_type_id])) {
+      continue;
+    }
+    foreach ($item as $table_name => $table_schema) {
+      foreach ($table_schema as $schema_key => $schema_data) {
+        if ($schema_key === 'fields') {
+          $field_schema_key = 'media.field_schema_data.' . $field_name;
+          $field_schema = $schema_key_value->get($field_schema_key, array());
+
+          // Test if field schema contains a known nexx property.
+          // TODO: investigate how to properly determine,
+          // if we are dealing with a nexx field.
+          $existing_field_property = $field_name . '_encodedSSC';
+          $update_field_properties = array($field_name . '_description', $field_name . '_altdescription');
+
+          if (isset($schema_data[$existing_field_property])) {
+            foreach ($update_field_properties as $update_field_property) {
+
+              // This is the actual update, deleting the fields.
+              if ($database_schema->tableExists($table_name) && $database_schema->fieldExists($table_name, $update_field_property)) {
+                $messages[] = t('Updating nexx field @field in table @table', array(
+                  '@field' => $field_name,
+                  '@table' => $table_name,
+                ));
+                $database_schema->dropField($table_name, $update_field_property);
+                // also update schema key value
+                foreach ($field_schema as $table => $definition) {
+                  unset($field_schema[$table]['fields'][$update_field_property]);
+                }
+              }
+            }
+            $schema_key_value->set($field_schema_key, $field_schema);
+          }
+        }
+      }
+    }
+  }
+
+  $message = '';
+  if (!empty($messages)) {
+    $message .= implode('</br>', $messages);
+  }
+  return $message;
+}
