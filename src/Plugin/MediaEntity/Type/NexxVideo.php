@@ -246,14 +246,6 @@ class NexxVideo extends MediaTypeBase {
     /** @var MediaBundleInterface $bundle */
     $bundle = $form_state->getFormObject()->getEntity();
 
-    $form['channel_field'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Channel taxonomy field mapping'),
-      '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
-      '#empty_option' => $this->t('Select field'),
-      '#default_value' => empty($this->configuration['channel_field']) ? NULL : $this->configuration['channel_field'],
-      '#description' => $this->t('The taxonomy which is used for videos. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding taxonomy term entity references to the bundle.'),
-    ];
     $form['description_field'] = [
       '#type' => 'select',
       '#title' => $this->t('Description field mapping'),
@@ -261,6 +253,14 @@ class NexxVideo extends MediaTypeBase {
       '#empty_option' => $this->t('Select field'),
       '#default_value' => empty($this->configuration['description_field']) ? NULL : $this->configuration['description_field'],
       '#description' => $this->t('The field where descriptions are stored. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding text fields to the bundle.'),
+    ];
+    $form['channel_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Channel taxonomy field mapping'),
+      '#options' => $this->getMediaEntityReferenceFields($bundle->id(), ['taxonomy_term']),
+      '#empty_option' => $this->t('Select field'),
+      '#default_value' => empty($this->configuration['channel_field']) ? NULL : $this->configuration['channel_field'],
+      '#description' => $this->t('The taxonomy which is used for videos. You can create a bundle without selecting a value for this dropdown initially. This dropdown will be populated after adding taxonomy term entity references to the bundle.'),
     ];
     $form['actor_field'] = [
       '#type' => 'select',

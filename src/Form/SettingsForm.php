@@ -76,20 +76,21 @@ class SettingsForm extends ConfigFormBase {
     $form['nexx_api_url'] = [
       '#type' => 'textfield',
       '#title' => $this->t('API Url'),
+      '#description' => $this->t('The notification endpoint of nexx.tv. The default value does usually not have to be changed.'),
       '#default_value' => $api_url,
     ];
 
     $api_key = !empty($values['nexx_api_authkey']) ? $values['nexx_api_authkey'] : $settings->get('nexx_api_authkey');
     $form['nexx_api_authkey'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('API authkey'),
+      '#title' => $this->t('API key (THOR)'),
       '#default_value' => $api_key,
     ];
 
     $omnia_id = !empty($values['omnia_id']) ? $values['omnia_id'] : $settings->get('omnia_id');
     $form['omnia_id'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Omnia ID'),
+      '#title' => $this->t('Domain ID'),
       '#description' => $this->t('The unique identifier of the site, given by nexx.tv.'),
       '#default_value' => $omnia_id,
     ];
