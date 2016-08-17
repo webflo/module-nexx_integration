@@ -83,8 +83,8 @@ class SettingsForm extends ConfigFormBase {
     $api_key = !empty($values['nexx_api_authkey']) ? $values['nexx_api_authkey'] : $settings->get('nexx_api_authkey');
     $form['nexx_api_authkey'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Thunder Installation Code'),
-      '#description' => $this->t('The thunder installation code you git, when you registered for nexx. In nexx omnia this is also called "API Key (THOR)"'),
+      '#title' => $this->t('Installation Code'),
+      '#description' => $this->t('The installation code you get, when you registered for nexx. In nexx omnia this is also called "API Key (THOR)"'),
       '#default_value' => $api_key,
     ];
 
@@ -92,7 +92,7 @@ class SettingsForm extends ConfigFormBase {
     $form['omnia_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Domain ID'),
-      '#description' => $this->t('The unique identifier of the site, given by nexx.tv.'),
+      '#description' => $this->t('The unique identifier of the site, given by nexx.'),
       '#default_value' => $omnia_id,
     ];
 
