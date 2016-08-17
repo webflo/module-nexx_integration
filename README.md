@@ -1,14 +1,14 @@
 ## About Nexx integration
 
-The nexx integration module integrates Videos uploaded to nexx.tv (http://www.nexx.tv/) video CMS - called Omnnia - into drupal. 
+The nexx integration module integrates videos uploaded to nexx.tv (http://www.nexx.tv/) video CMS - called Omnnia - into drupal. 
 If you connect nexx.tv and drupal with this module, Videos updated to nexx.tv will automatically be created on 
 your drupal site as media entites. If you render those entitites on your article, a video player with this will be shown. 
 
-To be able to use the nexx module, you will first have to register at www.nexx.tv/thunder first. The registration is 
+To be able to use the nexx module, you will first have to register at http://www.nexx.tv/thunder first. The registration is 
 for free and you can stream up to 100.000 videos per month for free. You can buy more streams per month if needed.
 
 # Installation
-After you registered at nexx.tv and activated the module, you will need the domain ID and the API key (THOR), that you have to 
+After you registered at nexx.tv/thunder and activated the module, you will need the domain ID and the API key (THOR), that you have to 
 configure on the admin/config/media/nexx page in your installation.
 On this page you can also create new token wich has to be provided to Omnnia (https://omnia.nexx.cloud/domains) 
 as the notification endpoint.
