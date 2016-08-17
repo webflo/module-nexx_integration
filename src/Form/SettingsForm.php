@@ -83,7 +83,8 @@ class SettingsForm extends ConfigFormBase {
     $api_key = !empty($values['nexx_api_authkey']) ? $values['nexx_api_authkey'] : $settings->get('nexx_api_authkey');
     $form['nexx_api_authkey'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('API key (THOR)'),
+      '#title' => $this->t('Thunder Installation Code'),
+      '#description' => $this->t('The thunder installation code you git, when you registered for nexx. In nexx omnia this is also called "API Key (THOR)"'),
       '#default_value' => $api_key,
     ];
 
