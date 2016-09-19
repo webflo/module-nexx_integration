@@ -72,8 +72,20 @@ class SettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
     $settings = $this->config('nexx_integration.settings');
 
+
+    $form['notification_settings'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Notification settings')
+    ];
+
+    $form['notification_settings']['intro'][] = [
+      '#markup' => $this->t('Register a new account at <a href=":nexx_url" target="_blank">http://www.nexx.tv/thunder</a> and get a domain ID and an installation code.',
+        [':nexx_url' => 'http://www.nexx.tv/thunder']),
+    ];
+
+
     $api_url = !empty($values['nexx_api_url']) ? $values['nexx_api_url'] : $settings->get('nexx_api_url');
-    $form['nexx_api_url'] = [
+    $form['notification_settings']['nexx_api_url'] = [
       '#type' => 'textfield',
       '#title' => $this->t('API Url'),
       '#description' => $this->t('The notification endpoint of nexx.tv. The default value does usually not have to be changed.'),
@@ -81,7 +93,7 @@ class SettingsForm extends ConfigFormBase {
     ];
 
     $api_key = !empty($values['nexx_api_authkey']) ? $values['nexx_api_authkey'] : $settings->get('nexx_api_authkey');
-    $form['nexx_api_authkey'] = [
+    $form['notification_settings']['nexx_api_authkey'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Installation Code'),
       '#description' => $this->t('The installation code you get, when you registered for nexx. In nexx omnia this is also called "API Key (THOR)"'),
@@ -89,7 +101,7 @@ class SettingsForm extends ConfigFormBase {
     ];
 
     $omnia_id = !empty($values['omnia_id']) ? $values['omnia_id'] : $settings->get('omnia_id');
-    $form['omnia_id'] = [
+    $form['notification_settings']['omnia_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Domain ID'),
       '#description' => $this->t('The unique identifier of the site, given by nexx.'),
@@ -98,8 +110,9 @@ class SettingsForm extends ConfigFormBase {
 
     // Add the embed type plugin settings.
     $form['type_settings'] = [
-      '#type' => 'container',
+      '#type' => 'fieldset',
       '#tree' => TRUE,
+      '#title' => $this->t('Bundle settings'),
       '#prefix' => '<div id="nexx-type-settings-wrapper">',
       '#suffix' => '</div>',
     ];
@@ -113,13 +126,10 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $bundle,
       '#description' => $this->t('The bundle which is used for videos.'),
     );
-    $form['type_settings']['bundles']['#access'] = !empty($form['bundles']['#options']);
+    $form['type_settings']['bundles']['#access'] = !empty($form['type_settings']['bundles']['#options']);
 
 
-    $form['notification_settings'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Notification settings'),
-    ];
+
     $form['notification_settings']['notification_access_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('NEXX notification access key'),
@@ -135,7 +145,7 @@ class SettingsForm extends ConfigFormBase {
       // we include this here to make it skip the form-level validator.
       '#validate' => array(),
     ];
-    $form['info'][] = [
+    $form['notification_settings']['info'][] = [
       '#markup' => '<p>' . $this->t('The current value to provide in omnia domain settings for the video endpoint is:<br><strong>:endpoint</strong>',
         array(
           ':endpoint' => $base_url . Url::fromRoute('nexx_integration.omnia_notification_gateway')->toString() . '?token=' . $settings->get('notification_access_key')
@@ -173,6 +183,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('nexx_api_url', $values['nexx_api_url'])
       ->set('nexx_api_authkey', $values['nexx_api_authkey'])
       ->set('omnia_id', $values['omnia_id'])
+      ->set('notification_access_key', $values['notification_access_key'])
       ->save();
   }
 
