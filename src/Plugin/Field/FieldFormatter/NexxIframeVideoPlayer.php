@@ -80,7 +80,6 @@ class NexxIframeVideoPlayer extends FormatterBase implements ContainerFactoryPlu
     $elements = [];
 
     foreach ($items as $delta => $item) {
-
       $elements[$delta] = [
         '#theme' => 'iframe_nexx_player',
         '#omnia_id' => $this->config->get('omnia_id'),
@@ -91,11 +90,6 @@ class NexxIframeVideoPlayer extends FormatterBase implements ContainerFactoryPlu
             'nexx_integration/base',
           ),
         ),
-        /*
-        '#cache' => [
-          'tags' => $user->getCacheTags(),
-        ],
-         */
       ];
     }
 
