@@ -11,7 +11,7 @@ nexx_integration.omnia_notification_gateway:
   defaults:
     _controller: '\Drupal\nexx_integration\Controller\OmniaController::video'
   requirements:
-    _permission: 'access content'
+    _access: 'TRUE'
 
 nexx_integration.list:
   path: '/admin/content/nexx'
