@@ -28,6 +28,6 @@ Interesting mappigs are:
 # Drush integration
 To export existing taxonomy terms to Omnia use the following drush command:
 
-drush nexx-export-taxonomy vocabularyname
+drush nexx-export-taxonomy vocabulary name
 
 When the given taxonomy vocabulary is mapped to an Omnia taxonomy, then all terms of this vocabulary will be pushed to Omnia.
