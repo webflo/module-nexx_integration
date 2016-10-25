@@ -68,21 +68,18 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     global $base_url;
 
-
     $values = $form_state->getValues();
     $settings = $this->config('nexx_integration.settings');
 
-
     $form['notification_settings'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Notification settings')
+      '#title' => $this->t('Notification settings'),
     ];
 
     $form['notification_settings']['intro'][] = [
       '#markup' => $this->t('Register a new account at <a href=":nexx_url" target="_blank">http://www.nexx.tv/thunder</a> and get a domain ID and an installation code.',
         [':nexx_url' => 'http://www.nexx.tv/thunder']),
     ];
-
 
     $api_url = !empty($values['nexx_api_url']) ? $values['nexx_api_url'] : $settings->get('nexx_api_url');
     $form['notification_settings']['nexx_api_url'] = [
@@ -128,8 +125,6 @@ class SettingsForm extends ConfigFormBase {
     );
     $form['type_settings']['bundles']['#access'] = !empty($form['type_settings']['bundles']['#options']);
 
-
-
     $form['notification_settings']['notification_access_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('NEXX notification access key'),
@@ -148,7 +143,7 @@ class SettingsForm extends ConfigFormBase {
     $form['notification_settings']['info'][] = [
       '#markup' => '<p>' . $this->t('The current value to provide in omnia domain settings for the video endpoint is:<br><strong>:endpoint</strong>',
         array(
-          ':endpoint' => $base_url . Url::fromRoute('nexx_integration.omnia_notification_gateway')->toString() . '?token=' . $settings->get('notification_access_key')
+          ':endpoint' => $base_url . Url::fromRoute('nexx_integration.omnia_notification_gateway')->toString() . '?token=' . $settings->get('notification_access_key'),
         )
       ) . '</p>',
     ];

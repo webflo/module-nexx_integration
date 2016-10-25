@@ -151,7 +151,7 @@ class NexxNotification implements NexxNotificationInterface {
    * @param string[] $values
    *   The values to be set.
    *
-   * @return string[] $response_data
+   * @return string[]
    *   Decoded response.
    */
   protected function notificateNexx(

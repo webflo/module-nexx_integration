@@ -72,7 +72,7 @@ class OmniaController extends ControllerBase {
   /**
    * Token service.
    *
-   * @var \Drupal\Core\Utility\Token;
+   * @var \Drupal\Core\Utility\Token
    */
   protected $token;
 
@@ -295,12 +295,12 @@ class OmniaController extends ControllerBase {
       }
     }
 
-    // map the description
-    if($descriptionField) {
+    // Map the description.
+    if ($descriptionField) {
       $media->$descriptionField = $videoData->itemData->description;
     }
 
-    // media entity does not update mapped fields by itself
+    // Media entity does not update mapped fields by itself.
     foreach ($media->bundle->entity->field_map as $source_field => $destination_field) {
       if ($media->hasField($destination_field) && ($value = $media->getType()->getField($media, $source_field))) {
         $media->set($destination_field, $value);
@@ -314,7 +314,7 @@ class OmniaController extends ControllerBase {
    * @param int[] $omnia_ids
    *    Array of omnia termn ids.
    *
-   * @return int[] $drupal_ids
+   * @return int[]
    *    Array of mapped drupal ids, might contain less ids then the input array.
    */
   protected function mapMultipleTermIds($omnia_ids) {
@@ -341,7 +341,7 @@ class OmniaController extends ControllerBase {
    * @param int $omnia_id
    *    The omnia id of the term.
    *
-   * @return int $drupalId
+   * @return int
    *    The drupal id of the term.
    */
   protected function mapTermId($omnia_id) {
@@ -451,7 +451,7 @@ class OmniaController extends ControllerBase {
   /**
    * Retrieve video data field name.
    *
-   * @return string $videoField
+   * @return string
    *    The name of the field.
    *
    * @throws \Exception
