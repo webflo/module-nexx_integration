@@ -183,7 +183,7 @@ class NexxVideo extends MediaTypeBase {
    * @param MediaInterface $media
    *    The media object for which the field should be retrieved.
    *
-   * @return string $videoField
+   * @return string
    *    The fieldname of the video field;
    *
    * @throws \Exception
@@ -203,7 +203,7 @@ class NexxVideo extends MediaTypeBase {
 
     return $videoField;
   }
-  
+
   /**
    * {@inheritdoc}
    */
@@ -217,8 +217,8 @@ class NexxVideo extends MediaTypeBase {
   public function thumbnail(MediaInterface $media) {
     $teaser_field = $this->configuration['teaser_image_field'];
 
-    // if a teaser file mapping is given, use this as thumbnail
-    if(!empty($teaser_field) && !empty($media->{$teaser_field})) {
+    // If a teaser file mapping is given, use this as thumbnail.
+    if (!empty($teaser_field) && !empty($media->{$teaser_field})) {
       $teaser_image = $media->{$teaser_field}->first()->entity;
 
       $source_field = $this->entityTypeManager->getStorage('media_bundle')
@@ -308,7 +308,7 @@ class NexxVideo extends MediaTypeBase {
     foreach ($this->entityFieldManager->getFieldDefinitions('media', $bundle_id) as $field_id => $field_info) {
       // Filter entity_references which are not base fields.
       if ($field_info->getType() === 'entity_reference' && !$field_info->getFieldStorageDefinition()
-          ->isBaseField() && in_array($field_info->getSettings()['target_type'], $target_types)
+        ->isBaseField() && in_array($field_info->getSettings()['target_type'], $target_types)
       ) {
         $bundle_options[$field_id] = $field_info->getLabel();
       }
@@ -316,7 +316,6 @@ class NexxVideo extends MediaTypeBase {
     natsort($bundle_options);
     return $bundle_options;
   }
-
 
   /**
    * Builds a list of text fields of a media entity.
@@ -335,7 +334,7 @@ class NexxVideo extends MediaTypeBase {
       $types = ['text_long', 'text_with_summary', 'string_long'];
 
       if (in_array($field_info->getType(), $types) && !$field_info->getFieldStorageDefinition()
-          ->isBaseField()
+        ->isBaseField()
       ) {
         $bundle_options[$field_id] = $field_info->getLabel();
       }
@@ -344,4 +343,5 @@ class NexxVideo extends MediaTypeBase {
     natsort($bundle_options);
     return $bundle_options;
   }
+
 }
