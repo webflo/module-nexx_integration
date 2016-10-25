@@ -57,6 +57,7 @@ class NexxNotification implements NexxNotificationInterface {
    *
    * Notify when channel or actor terms have been updated,
    * or when a video has been created.
+   * TODO: entity type manager and node query are not used anymore, remove them.
    *
    * @param EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
