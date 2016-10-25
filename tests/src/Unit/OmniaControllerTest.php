@@ -28,4 +28,13 @@ class OmniaControllerTest extends UnitTestCase {
     parent::setUp();
   }
 
+  /**
+   * Test dummy to test travis integration.
+   *
+   * TODO: Write real tests!
+   */
+  public function testIntegration() {
+    self::assertEquals(1, 1);
+  }
+
 }
