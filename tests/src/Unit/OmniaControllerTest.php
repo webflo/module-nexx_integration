@@ -3,7 +3,6 @@
 namespace Drupal\Tests\nexx_integration\Unit;
 
 use Drupal\Tests\UnitTestCase;
-use Drupal\nexx_integration\Controller\OmniaController;
 
 /**
  * Provides automated tests for the nexx integration Omnia controller.
@@ -27,6 +26,15 @@ class OmniaControllerTest extends UnitTestCase {
    */
   public function setUp() {
     parent::setUp();
+  }
+
+  /**
+   * Test dummy to test travis integration.
+   *
+   * TODO: Write real tests!
+   */
+  public function testIntegration() {
+    self::assertEquals(1, 1);
   }
 
 }
