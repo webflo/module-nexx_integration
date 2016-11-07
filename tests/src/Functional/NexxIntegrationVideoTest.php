@@ -71,7 +71,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $response = $httpClient->post($omniaUrl->toString(), [
       'body' => $data,
       'headers' => [
-          'Content-Type' => 'application/json'
+        'Content-Type' => 'application/json',
       ],
     ]);
 
