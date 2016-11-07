@@ -254,14 +254,29 @@ class OmniaController extends ControllerBase {
     $media->$labelKey = $title;
 
     $media_config = $media->getType()->getConfiguration();
-    $channelField = $media_config['channel_field'];
-    $actorField = $media_config['actor_field'];
-    $tagField = $media_config['tag_field'];
-    $teaserImageField = $media_config['teaser_image_field'];
-    $descriptionField = $media_config['description_field'];
+
+    if (!empty($media_config['channel_field'])) {
+      $channelField = $media_config['channel_field'];
+    }
+
+    if (!empty($media_config['actor_field'])) {
+      $actorField = $media_config['actor_field'];
+    }
+
+    if (!empty($media_config['tag_field'])) {
+      $tagField = $media_config['tag_field'];
+    }
+
+    if (!empty($media_config['teaser_image_field'])) {
+      $teaserImageField = $media_config['teaser_image_field'];
+    }
+
+    if (!empty($media_config['description_field'])) {
+      $descriptionField = $media_config['description_field'];
+    }
 
     // Update taxonomy references.
-    if ($channelField && !empty($channel_id)) {
+    if (!empty($channelField) && !empty($channel_id)) {
       $term_id = $this->mapTermId($channel_id);
       if (!empty($term_id)) {
         $media->$channelField = $term_id;
@@ -275,17 +290,17 @@ class OmniaController extends ControllerBase {
       }
     }
 
-    if ($actorField) {
+    if (!empty($actorField)) {
       $mapped_actor_ids = $this->mapMultipleTermIds($actor_ids);
       $media->$actorField = $mapped_actor_ids;
     }
 
-    if ($tagField) {
+    if (!empty($tagField)) {
       $mapped_tag_ids = $this->mapMultipleTermIds($tag_ids);
       $media->$tagField = $mapped_tag_ids;
     }
 
-    if ($teaserImageField && $media->$videoField->thumb !== $videoData->itemData->thumb) {
+    if (!empty($teaserImageField) && $media->$videoField->thumb !== $videoData->itemData->thumb) {
       if (!empty($videoData->itemData->thumb)) {
         $media->$videoField->thumb = $videoData->itemData->thumb;
         $this->mapTeaserImage($media, $teaserImageField, $videoData);
@@ -296,7 +311,7 @@ class OmniaController extends ControllerBase {
     }
 
     // Map the description.
-    if ($descriptionField) {
+    if (!empty($descriptionField)) {
       $media->$descriptionField = $videoData->itemData->description;
     }
 
@@ -369,6 +384,9 @@ class OmniaController extends ControllerBase {
    */
   protected function mapTeaserImage(MediaInterface $media, $teaserImageField, $videoData) {
     $images_field = $media->$teaserImageField;
+    if (empty($images_field)) {
+      return;
+    }
     $images_field_target_type = $images_field->getSetting('target_type');
 
     /*

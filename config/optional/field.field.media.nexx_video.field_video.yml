@@ -15,15 +15,12 @@ required: false
 translatable: false
 default_value:
   -
-    item_id: '0'
+    item_id: 0
     title: null
     thumb: null
     subtitle: null
     alttitle: null
     teaser: null
-    description: null
-    altdescription: null
-    uploaded: null
     channel_id: null
     actors_ids: null
     isSSC: null
