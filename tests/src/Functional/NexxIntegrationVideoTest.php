@@ -67,7 +67,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $omniaUrl = Url::fromRoute('nexx_integration.omnia_notification_gateway', ['token' => $this->config->get('notification_access_key')], ['absolute' => TRUE]);
     $httpClient = $this->container->get('http_client');
 
-    /* $response \GuzzleHttp\Psr7\Response */
+    /* @var $response \GuzzleHttp\Psr7\Response */
     $response = $httpClient->post($omniaUrl->toString(), [
       'body' => $data,
       'headers' => [
@@ -75,8 +75,8 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
       ],
     ]);
 
-    $response = json_decode($response->getBody());
-    $this->assertEquals('75045', $response->refnr);
+    $responseBody = json_decode($response->getBody());
+    $this->assertEquals('75045', $responseBody->refnr);
   }
 
   /**
