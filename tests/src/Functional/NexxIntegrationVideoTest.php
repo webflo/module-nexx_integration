@@ -79,6 +79,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
       ],
     ]);
 
+    print_r($response->getBody());
     $responseBody = \GuzzleHttp\json_decode($response->getBody());
     return $responseBody;
   }
