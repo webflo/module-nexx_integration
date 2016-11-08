@@ -37,7 +37,8 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    * Test the endpoint.
    */
   public function testVideoEndpoint() {
-    $this->postVideoData();
+    $videoData = $this->postVideoData();
+    $this->assertEquals('75045', $videoData->refnr);
   }
 
   /**
@@ -59,6 +60,9 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    *
    * @param array $data
    *   Json encoded data to send at video endpoint.
+   *
+   * @return mixed
+   *   Response Body of request.
    */
   protected function postVideoData($data = []) {
     if (empty($data)) {
@@ -76,7 +80,17 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     ]);
 
     $responseBody = json_decode($response->getBody());
-    $this->assertEquals('75045', $responseBody->refnr);
+    return $responseBody;
+  }
+
+  /**
+   * Display the video with the given ID.
+   *
+   * @param int $videoId
+   *   Video ID.
+   */
+  protected function displayVideo($videoId) {
+
   }
 
   /**
