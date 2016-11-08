@@ -73,7 +73,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
 
     /* @var $response \GuzzleHttp\Psr7\Response */
     $response = $httpClient->post($omniaUrl->toString(), [
-      'body' => $data,
+      'body' => json_encode($data),
       'headers' => [
         'Content-Type' => 'application/json',
       ],
@@ -100,112 +100,113 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    *   Test data.
    */
   protected function getTestVideoData() {
+    $itemData = new \stdClass();
+    $itemData->itemID = "75045";
+    $itemData->hash = "GL7ADZXZJ75045P";
+    $itemData->connector = "612";
+    $itemData->title = "Test Video";
+    $itemData->subtitle = "";
+    $itemData->teaser = "";
+    $itemData->orderhint = "";
+    $itemData->description = "The description text";
+    $itemData->category = "";
+    $itemData->channel = "CMS";
+    $itemData->videotype = "movie";
+    $itemData->genre = "";
+    $itemData->isPay = "0";
+    $itemData->uploaded = 1463997938;
+    $itemData->tags = "Tag1,Tag2";
+    $itemData->lat = "0";
+    $itemData->lng = "0";
+    $itemData->location = "";
+    $itemData->country = "";
+    $itemData->actors = "";
+    $itemData->shows = "";
+    $itemData->voices = "";
+    $itemData->director = "";
+    $itemData->producer = "";
+    $itemData->cameraman = "";
+    $itemData->scriptby = "";
+    $itemData->musicby = "";
+    $itemData->conductor = "";
+    $itemData->studio = "0";
+    $itemData->year = "2016";
+    $itemData->copyright = "";
+    $itemData->imagecopyright = "";
+    $itemData->awards = "";
+    $itemData->ages = "0";
+    $itemData->hasTrailerID = "0";
+    $itemData->isReferenceOf = "0";
+    $itemData->linkedAlbum = "0";
+    $itemData->linkedFile = 0;
+    $itemData->language = "deutsch";
+    $itemData->encodedTHUMBS = "1";
+    $itemData->rating = 3;
+    $itemData->ratingcount = 0;
+    $itemData->thumb = "http://nx-i.akamaized.net/201605/G750452J1M6XAOWxL.jpg";
+    $itemData->thumb_ssl = "https://nx-i.akamaized.net/201605/G750452J1M6XAOWxL.jpg";
+    $itemData->thumb_alt = "http://nx-i.akamaized.net/global/nodata/nodataxL.jpg";
+    $itemData->thumb_alt_ssl = "https://nx-i.akamaized.net/global/nodata/nodataxL.jpg";
+    $itemData->thumb_action = "http://nx-i.akamaized.net/global/nodata/nodataxL.jpg";
+    $itemData->thumb_action_ssl = "https://nx-i.akamaized.net/global/nodata/nodataxL.jpg";
+    $itemData->runtime = "00:02:45";
+    $itemData->hasSubtitles = 0;
+    $itemData->userid = 0;
+    $itemData->orientation = "landscape";
+    $itemData->isTrailerOf = 0;
+    $itemData->thumb_animatedgif = "http://nx-i.akamaized.net/global/nodata/nodata.jpg";
+    $itemData->thumb_animatedgif_ssl = "https://nx-i.akamaized.net/global/nodata/nodata.jpg";
+    $itemData->thumb_hasX2 = "0";
+    $itemData->thumb_hasX3 = "0";
+    $itemData->categoryname = "";
+    $itemData->channel_id = "1";
+    $itemData->parent_channel = 0;
+    $itemData->commentcount = 0;
+    $itemData->actors_ids = "1,2";
+    $itemData->likecount = 0;
+    $itemData->tags_ids = "2";
+    $itemData->studioname = "";
+    $itemData->currency = "EUR";
+    $itemData->discount = 0;
+    $itemData->price = 0;
+    $itemData->originalprice = 0;
+    $itemData->genre_ids = "";
 
-    // This is a data dump from an original call.
-    $serializedData = '{
-      "itemID": "75045",
-      "itemReference": "",
-      "itemMime": "video",
-      "clientID": "612",
-      "triggerReason": "metadata",
-      "triggerTime": "1465392767",
-      "sendingTime": 1465392783,
-      "triggeredInSession": "214653913620510632",
-      "triggeredByUser": "119574",
-      "itemData": {
-        "itemID": "75045",
-        "hash": "GL7ADZXZJ75045P",
-        "connector": "612",
-        "title": "Thunder CMS token 2",
-        "subtitle": "",
-        "teaser": "",
-        "orderhint": "",
-        "description": "Lavendel ist eine sehr dankbare und pflegeleichte die Pflanze die nach der Bl\u00fcte etwas Zuwendung braucht. In unserem Video zeigen wir Euch, wie Ihr Lavendel nach der Bl\u00fcte schneidet und die Bl\u00fcten praktisch verwertet.\r\nWie Ihr Euren Lavendel lange gesund und kraftvoll haltet erfahrt Ihr in unserem Lavendel-Artikel: http:\/\/bit.ly\/2aXyjC3\r\n\r\nWenn euch das Video gefallen hat, schenkt uns ein \u201eGef\u00e4llt mir\u201c und abonniert unseren Kanal. Danke! Euer Online-Team von MEIN SCH\u00d6NER GARTEN\r\n_______________________________\r\nMEHR VON MEIN SCH\u00d6NER GARTEN\r\n\r\n\u2741 Facebook: https:\/\/www.facebook.com\/meinschoener...\r\n\u2741 Instagram: https:\/\/www.instagram.com\/mein_schoen...\r\n\u2741 Pinterest: https:\/\/de.pinterest.com\/schoenergarten\/\r\n\u2741 Twitter: https:\/\/twitter.com\/meingarten\r\n\u2741 Google+: http:\/\/bit.ly\/29XGEts",
-        "category": "",
-        "channel": "CMS",
-        "videotype": "movie",
-        "genre": "",
-        "isPay": "0",
-        "uploaded": 1463997938,
-        "tags": "Testtag,Haus",
-        "lat": "0",
-        "lng": "0",
-        "location": "",
-        "country": "",
-        "actors": "",
-        "shows": "",
-        "voices": "",
-        "director": "",
-        "producer": "",
-        "cameraman": "",
-        "scriptby": "",
-        "musicby": "",
-        "conductor": "",
-        "studio": "0",
-        "year": "2016",
-        "copyright": "",
-        "imagecopyright": "",
-        "awards": "",
-        "ages": "0",
-        "hasTrailerID": "0",
-        "isReferenceOf": "0",
-        "linkedAlbum": "0",
-        "linkedFile": 0,
-        "language": "deutsch",
-        "encodedTHUMBS": "1",
-        "rating": 3,
-        "ratingcount": 0,
-        "thumb": "http:\/\/nx-i.akamaized.net\/201605\/G750452J1M6XAOWxL.jpg",
-        "thumb_ssl": "https:\/\/nx-i.akamaized.net\/201605\/G750452J1M6XAOWxL.jpg",
-        "thumb_alt": "http:\/\/nx-i.akamaized.net\/global\/nodata\/nodataxL.jpg",
-        "thumb_alt_ssl": "https:\/\/nx-i.akamaized.net\/global\/nodata\/nodataxL.jpg",
-        "thumb_action": "http:\/\/nx-i.akamaized.net\/global\/nodata\/nodataxL.jpg",
-        "thumb_action_ssl": "https:\/\/nx-i.akamaized.net\/global\/nodata\/nodataxL.jpg",
-        "runtime": "00:02:45",
-        "hasSubtitles": 0,
-        "userid": 0,
-        "orientation": "landscape",
-        "isTrailerOf": 0,
-        "thumb_animatedgif": "http:\/\/nx-i.akamaized.net\/global\/nodata\/nodata.jpg",
-        "thumb_animatedgif_ssl": "https:\/\/nx-i.akamaized.net\/global\/nodata\/nodata.jpg",
-        "thumb_hasX2": "0",
-        "thumb_hasX3": "0",
-        "categoryname": "",
-        "channel_id": "833",
-        "parent_channel": 0,
-        "commentcount": 0,
-        "actors_ids": "19478,19479",
-        "likecount": 0,
-        "tags_ids": "9918",
-        "studioname": "",
-        "currency": "EUR",
-        "discount": 0,
-        "price": 0,
-        "originalprice": 0,
-        "genre_ids": ""
-      },
-      "itemStates": {
-        "isSSC": 1,
-        "encodedSSC": 1,
-        "validfrom_ssc": 0,
-        "validto_ssc": 0,
-        "encodedHTML5": 1,
-        "isMOBILE": 1,
-        "encodedMOBILE": 1,
-        "validfrom_mobile": 0,
-        "validto_mobile": 0,
-        "active": 1,
-        "isDeleted": 0,
-        "isBlocked": 0,
-        "encodedTHUMBS": 1,
-        "validto_image": 0,
-        "autodelete": "0000-00-00",
-        "georestriction": "",
-        "geoexcludes": "",
-        "ages": 0
-      }
-    }';
-    return $serializedData;
+    $itemStates = new \stdClass();
+    $itemStates->isSSC = 1;
+    $itemStates->encodedSSC = 1;
+    $itemStates->validfrom_ssc = 0;
+    $itemStates->validto_ssc = 0;
+    $itemStates->encodedHTML5 = 1;
+    $itemStates->isMOBILE = 1;
+    $itemStates->encodedMOBILE = 1;
+    $itemStates->validfrom_mobile = 0;
+    $itemStates->validto_mobile = 0;
+    $itemStates->active = 1;
+    $itemStates->isDeleted = 0;
+    $itemStates->isBlocked = 0;
+    $itemStates->encodedTHUMBS = 1;
+    $itemStates->validto_image = 0;
+    $itemStates->autodelete = "0000-00-00";
+    $itemStates->georestriction = "";
+    $itemStates->geoexcludes = "";
+    $itemStates->ages = 0;
+
+    $baseData = new \stdClass();
+    $baseData->itemID = "75045";
+    $baseData->itemReference = "";
+    $baseData->itemMime = "video";
+    $baseData->clientID = "1";
+    $baseData->triggerReason = "metadata";
+    $baseData->triggerTime = "1465392767";
+    $baseData->sendingTime = 1465392783;
+    $baseData->triggeredInSession = "214653913620510632";
+    $baseData->triggeredByUser = "119574";
+    $baseData->itemData = $itemData;
+    $baseData->itemStates = $itemStates;
+
+
+    return $baseData;
   }
 
 }
