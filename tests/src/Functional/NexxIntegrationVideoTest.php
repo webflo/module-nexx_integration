@@ -205,7 +205,6 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $baseData->itemData = $itemData;
     $baseData->itemStates = $itemStates;
 
-
     return $baseData;
   }
 
