@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\nexx_integration\Functional;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 
@@ -52,7 +51,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $this->assertEquals($data->itemData->title, $videoField->title);
     $this->assertEquals($data->itemData->hash, $videoField->hash);
     $this->assertEquals($data->itemData->teaser, $videoField->teaser);
-    $this->assertEquals($data->itemData->description, $videoField->description);
+
     $this->assertEquals($data->itemData->uploaded, $videoField->uploaded);
     $this->assertEquals($data->itemData->copyright, $videoField->copyright);
     $this->assertEquals($data->itemData->encodedTHUMBS, $videoField->encodedTHUMBS);
@@ -152,7 +151,6 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $itemStates->isBlocked = 0;
     $itemStates->encodedTHUMBS = 1;
     $itemStates->validto_image = 0;
-
 
     $baseData = new \stdClass();
     $baseData->itemID = "75045";
