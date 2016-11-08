@@ -102,6 +102,11 @@ before_install:
   # Code Checks
   - bash -x -e ./scripts/travis/test-source-code.sh
 
+  # fix default travis php.ini
+  echo 'always_populate_raw_post_data = -1' >> drupal.php.ini;
+  phpenv config-add drupal.php.ini
+  phpenv rehash
+
   # Continue with Drupal Tests
   - cd ./tests
   - composer global require "lionsad/drupal_ti:1.*"
