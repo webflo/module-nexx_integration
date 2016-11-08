@@ -103,7 +103,7 @@ before_install:
   - bash -x -e ./scripts/travis/test-source-code.sh
 
   # fix default travis php.ini
-  echo 'always_populate_raw_post_data = -1' >> drupal.php.ini
+  - echo 'always_populate_raw_post_data = -1' >> drupal.php.ini
   phpenv config-add drupal.php.ini
   phpenv rehash
 
