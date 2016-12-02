@@ -92,10 +92,9 @@ function nexx_integration_taxonomy_term_request(EntityInterface $term, $command,
 
   /*
    * Find media bundles, that have a setting for this vocabulary
-   * Find media bundles, that have a setting for this vocabulary
    */
   foreach ($container->get('entity_type.bundle.info')
-             ->getBundleInfo('media') as $bundle_id => $bundle_info) {
+    ->getBundleInfo('media') as $bundle_id => $bundle_info) {
     $bundle = $entity_type_manager->getStorage('media_bundle')
       ->load($bundle_id);
     if ($bundle->getType()->getPluginId() === 'nexx_video') {
@@ -189,7 +188,7 @@ function nexx_integration_theme() {
  * @param EntityInterface $term
  *   The term for which the naxx id should be found.
  *
- * @return int $nexx_id
+ * @return int
  *   nexx id for the given Term.
  */
 function nexx_integration_taxonomy_term_nexx_id(EntityInterface $term) {

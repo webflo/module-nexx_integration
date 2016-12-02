@@ -229,7 +229,8 @@ class OmniaController extends ControllerBase {
     $media->$videoField->altdescription = !empty($videoData->itemData->altdescription) ? substr($videoData->itemData->altdescription, 0, 256) : '';
     $media->$videoField->uploaded = !empty($videoData->itemData->uploaded) ? $videoData->itemData->uploaded : NULL;
     $media->$videoField->channel_id = $channel_id;
-    // This is redundant.
+    // This is redundant, actors will be mapped later. I do not remove it yet,
+    // because we still have to make sure, that there is no legacy usage.
     $media->$videoField->actors_ids = implode(",", $actor_ids);
     $media->$videoField->isSSC = !empty($videoData->itemStates->isSSC) ? $videoData->itemStates->isSSC : 0;
     $media->$videoField->encodedSSC = !empty($videoData->itemStates->encodedSSC) ? $videoData->itemStates->encodedSSC : 0;
@@ -250,8 +251,6 @@ class OmniaController extends ControllerBase {
     $media->$videoField->encodedTHUMBS = !empty($videoData->itemStates->encodedTHUMBS) ? $videoData->itemStates->encodedTHUMBS : 0;
     $media->$videoField->copyright = !empty($videoData->itemData->copyright) ? $videoData->itemData->copyright : '';
     $media->$videoField->runtime = !empty($videoData->itemData->runtime) ? $videoData->itemData->runtime : '00:00:00';
-
-    $media->$videoField->description;
 
     // Copy title to label field.
     $media->$labelKey = $title;

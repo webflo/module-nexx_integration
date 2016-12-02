@@ -146,7 +146,6 @@ function nexx_integration_update_8004() {
   return $message;
 }
 
-
 /**
  * Add new runtime and copyright fields to nexx field type.
  */
@@ -199,7 +198,6 @@ function nexx_integration_update_8005() {
   }
   return $message;
 }
-
 
 /**
  * Add new hash field to nexx field type.
@@ -294,7 +292,7 @@ function nexx_integration_update_8007() {
                   '@table' => $table_name,
                 ));
                 $database_schema->dropField($table_name, $update_field_property);
-                // also update schema key value
+                // Also update schema key value.
                 foreach ($field_schema as $table => $definition) {
                   unset($field_schema[$table]['fields'][$update_field_property]);
                 }
