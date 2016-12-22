@@ -159,7 +159,7 @@ class NexxNotification implements NexxNotificationInterface {
     $streamtype,
     $reference_number,
     $command,
-    $values = []
+    array $values = []
   ) {
     $api_url = $this->config->get('nexx_api_url');
     $api_authkey = $this->config->get('nexx_api_authkey');

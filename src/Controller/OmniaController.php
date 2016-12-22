@@ -334,7 +334,7 @@ class OmniaController extends ControllerBase {
    * @return int[]
    *    Array of mapped drupal ids, might contain less ids then the input array.
    */
-  protected function mapMultipleTermIds($omnia_ids) {
+  protected function mapMultipleTermIds(array $omnia_ids) {
     $drupal_ids = [];
     foreach ($omnia_ids as $omnia_id) {
       $drupalId = $this->mapTermId($omnia_id);
