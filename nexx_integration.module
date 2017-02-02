@@ -185,7 +185,7 @@ function nexx_integration_theme() {
 /**
  * Retrieve corresponding nexx id for a given taxonomy term.
  *
- * @param EntityInterface $term
+ * @param \Drupal\Core\Entity\EntityInterface $term
  *   The term for which the naxx id should be found.
  *
  * @return int

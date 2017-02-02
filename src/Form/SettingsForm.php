@@ -220,7 +220,7 @@ class SettingsForm extends ConfigFormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
-   * @return AjaxResponse
+   * @return \Drupal\Core\Ajax\AjaxResponse
    *   Ajax response with updated options for the embed type.
    */
   public function updateTypeSettings(array &$form, FormStateInterface $form_state) {

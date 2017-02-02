@@ -26,7 +26,7 @@ class NexxVideoInfo extends WidgetBase implements ContainerFactoryPluginInterfac
   /**
    * The config factory.
    *
-   * @var ConfigFactoryInterface
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
 

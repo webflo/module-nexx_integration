@@ -11,6 +11,7 @@ nexx_integration.omnia_notification_gateway:
   defaults:
     _controller: '\Drupal\nexx_integration\Controller\OmniaController::video'
   requirements:
+    # Token and key used inside this endpoint
     _access: 'TRUE'
 
 nexx_integration.list:

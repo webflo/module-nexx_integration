@@ -59,15 +59,15 @@ class NexxNotification implements NexxNotificationInterface {
    * or when a video has been created.
    * TODO: entity type manager and node query are not used anymore, remove them.
    *
-   * @param EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param QueryFactory $query
+   * @param \Drupal\Core\Entity\Query\QueryFactory $query
    *   The entity query object for taxonomy terms.
-   * @param ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory service.
-   * @param LoggerChannelFactory $logger
+   * @param \Drupal\Core\Logger\LoggerChannelFactory $logger
    *   The config factory service.
-   * @param Client $http_client
+   * @param \GuzzleHttp\Client $http_client
    *   The HTTP client.
    */
   public function __construct(

@@ -43,7 +43,7 @@ class NexxVideo extends MediaTypeBase {
    *   Entity field manager service.
    * @param \Drupal\Core\Config\Config $config
    *   Media entity config object.
-   * @param LoggerInterface $logger
+   * @param \Psr\Log\LoggerInterface $logger
    *   The logger service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, Config $config, LoggerInterface $logger) {
@@ -180,11 +180,11 @@ class NexxVideo extends MediaTypeBase {
   /**
    * Retrieve video field name.
    *
-   * @param MediaInterface $media
-   *    The media object for which the field should be retrieved.
+   * @param \Drupal\media_entity\MediaInterface $media
+   *   The media object for which the field should be retrieved.
    *
    * @return string
-   *    The fieldname of the video field;
+   *   The fieldname of the video field;
    *
    * @throws \Exception
    */
@@ -295,9 +295,9 @@ class NexxVideo extends MediaTypeBase {
    * Builds a list of references for a media entity.
    *
    * @param int $bundle_id
-   *    Entity type to get references for.
+   *   Entity type to get references for.
    * @param array $target_types
-   *    Target types filter.
+   *   Target types filter.
    *
    * @return array
    *   An array of field labels, keyed by field name.
@@ -321,7 +321,7 @@ class NexxVideo extends MediaTypeBase {
    * Builds a list of text fields of a media entity.
    *
    * @param int $bundle_id
-   *    Entity type to get references for.
+   *   Entity type to get references for.
    *
    * @return array
    *   An array of field labels, keyed by field name.
