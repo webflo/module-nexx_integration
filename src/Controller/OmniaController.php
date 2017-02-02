@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Utility\Token;
 use Drupal\media_entity\MediaInterface;
+use Drupal\media_entity\Entity\Media;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -79,15 +80,15 @@ class OmniaController extends ControllerBase {
   /**
    * Omnia constructor.
    *
-   * @param Connection $database
+   * @param \Drupal\Core\Database\Connection $database
    *   The database service.
-   * @param EntityTypeBundleInfoInterface $entity_type_bundle_info
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle info service.
-   * @param EntityFieldManagerInterface $entity_field_manager
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
-   * @param LoggerInterface $logger
+   * @param \Psr\Log\LoggerInterface $logger
    *   The logger service.
-   * @param Token $token
+   * @param \Drupal\Core\Utility\Token $token
    *   Token service.
    */
   public function __construct(
@@ -130,6 +131,14 @@ class OmniaController extends ControllerBase {
 
   /**
    * Endpoint for video creation / update.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   HTTP request.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   JSON response.
+   *
+   * @throws \Exception
    */
   public function video(Request $request) {
 
@@ -156,39 +165,82 @@ class OmniaController extends ControllerBase {
       throw new \Exception('ItemID missing');
     }
 
-    $this->logger->info('Incoming video "@title" (nexx id: @id)', array(
-      '@title' => $videoData->itemData->title,
-      '@id' => $videoData->itemID,
-    )
+    $this->logger->info('Incoming video "@title" (nexx id: @id)',
+      array(
+        '@title' => $videoData->itemData->title,
+        '@id' => $videoData->itemID,
+      )
     );
 
     $video_field = $this->videoFieldName();
     $ids = $query->condition($video_field . '.item_id', $videoData->itemID)
       ->execute();
 
-    if ($id = array_pop($ids)) {
-      $media = $this->mediaEntity($id);
+    // Delete video if incomming isDeleted is 1.
+    if ($videoData->itemStates->isDeleted == 1) {
+      if ($id = array_pop($ids)) {
+        $media = $this->mediaEntity($id);
+        $media->delete();
+        $this->logger->info('Deleted video "@title" (Drupal id: @id)',
+          array(
+            '@title' => $videoData->itemData->title,
+            '@id' => $id,
+          )
+        );
+        $response->setData([
+          'refnr' => $videoData->itemID,
+          'value' => $id,
+        ]);
+        return $response;
+      }
+      $response->setData([
+        'refnr' => $videoData->itemID,
+        'value' => NULL,
+      ]);
+      return $response;
     }
+
+    // Edit video.
+    elseif ($id = array_pop($ids)) {
+      $media = $this->mediaEntity($id);
+      $this->logger->info('Updated video "@title" (Drupal id: @id)',
+        array(
+          '@title' => $videoData->itemData->title,
+          '@id' => $media->id(),
+        )
+      );
+    }
+
+    // Create video.
     else {
       $media = $this->mediaEntity();
+      $this->logger->info('Created video "@title" (Drupal id: @id)',
+        array(
+          '@title' => $videoData->itemData->title,
+          '@id' => $media->id(),
+        )
+      );
     }
+
     $this->mapData($media, $videoData);
+    $this->setState($media, $videoData);
+
     $media->save();
-    $this->logger->info('Updated video "@title" (drupal id: @id)', array(
-      '@title' => $videoData->itemData->title,
-      '@id' => $media->id(),
-    )
-    );
     $response->setData([
       'refnr' => $videoData->itemID,
       'value' => $media->id(),
-    ]
-    );
+    ]);
     return $response;
   }
 
   /**
    * Get the media entity.
+   *
+   * @param int|null $id
+   *   Media entity id or NULL to create new one.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|\Drupal\media_entity\MediaInterface|null
+   *   Media entity or NULL if no matching entity is found.
    */
   protected function mediaEntity($id = NULL) {
     if (!isset($this->mediaEntity)) {
@@ -206,7 +258,56 @@ class OmniaController extends ControllerBase {
   }
 
   /**
+   * Set proper publish state to media entity.
+   *
+   * @param \Drupal\media_entity\MediaInterface $media
+   *   Media entity.
+   * @param object $videoData
+   *   Incoming VideoData object from Nexx.tv.
+   */
+  protected function setState(MediaInterface $media, $videoData) {
+
+    $status = Media::NOT_PUBLISHED;
+
+    if ($videoData->itemStates->active == 1
+      && $videoData->itemStates->isSSC == 1
+    ) {
+      $status = Media::PUBLISHED;
+
+      $this->logger->info('Published video "@title" (Drupal id: @id)',
+        array(
+          '@title' => $videoData->itemData->title,
+          '@id' => $media->id(),
+        )
+      );
+    }
+    else {
+      $this->logger->info('Unpublished video "@title" (Drupal id: @id)... States: 
+      active:@active 
+      isSSC:@isSSC 
+      validfrom_ssc:@validfrom_ssc 
+      validto_ssc:@validto_ssc ',
+        array(
+          '@title' => $videoData->itemData->title,
+          '@id' => $media->id(),
+          '@active' => $videoData->itemStates->active,
+          '@isSSC' => $videoData->itemStates->isSSC,
+          '@validfrom_ssc' => $videoData->itemStates->validfrom_ssc,
+          '@validto_ssc' => $videoData->itemStates->validto_ssc,
+        )
+      );
+    }
+
+    $media->set("status", $status);
+  }
+
+  /**
    * Map incoming nexx video data to media entity fields.
+   *
+   * @param \Drupal\media_entity\MediaInterface $media
+   *   Media entity.
+   * @param object $videoData
+   *   Incomming videoData object from Nexx.tv.
    */
   protected function mapData(MediaInterface $media, $videoData) {
     $entityType = $this->mediaEntityDefinition();
@@ -284,10 +385,11 @@ class OmniaController extends ControllerBase {
         $media->$channelField = $term_id;
       }
       else {
-        $this->logger->warning('Unknown ID @term_id for term "@term_name"', array(
-          '@term_id' => $channel_id,
-          '@term_name' => $videoData->itemData->channel,
-        )
+        $this->logger->warning('Unknown ID @term_id for term "@term_name"',
+          array(
+            '@term_id' => $channel_id,
+            '@term_name' => $videoData->itemData->channel,
+          )
         );
       }
     }
@@ -329,10 +431,10 @@ class OmniaController extends ControllerBase {
    * Map multiple omnia term ids to drupal term ids.
    *
    * @param int[] $omnia_ids
-   *    Array of omnia termn ids.
+   *   Array of omnia termn ids.
    *
    * @return int[]
-   *    Array of mapped drupal ids, might contain less ids then the input array.
+   *   Array of mapped drupal ids, might contain less ids then the input array.
    */
   protected function mapMultipleTermIds(array $omnia_ids) {
     $drupal_ids = [];
@@ -342,9 +444,10 @@ class OmniaController extends ControllerBase {
         $drupal_ids[] = $drupalId;
       }
       else {
-        $this->logger->warning('Unknown omnia ID @term_id"', array(
-          '@term_id' => $omnia_id,
-        )
+        $this->logger->warning('Unknown omnia ID @term_id"',
+          array(
+            '@term_id' => $omnia_id,
+          )
         );
       }
     }
@@ -356,10 +459,10 @@ class OmniaController extends ControllerBase {
    * Map omnia term Id to corresponding drupal term id.
    *
    * @param int $omnia_id
-   *    The omnia id of the term.
+   *   The omnia id of the term.
    *
    * @return int
-   *    The drupal id of the term.
+   *   The drupal id of the term.
    */
   protected function mapTermId($omnia_id) {
     $result = $this->database->select('nexx_taxonomy_term_data', 'n')
@@ -375,12 +478,12 @@ class OmniaController extends ControllerBase {
   /**
    * Map incoming teaser image to medie entity field.
    *
-   * @param MediaInterface $media
-   *    The media entity.
+   * @param \Drupal\media_entity\MediaInterface $media
+   *   The media entity.
    * @param string $teaserImageField
-   *    The machine name of the field, that stores the file.
+   *   The machine name of the field, that stores the file.
    * @param mixed $videoData
-   *    The video data object from the request.
+   *   The video data object from the request.
    *
    * @throws \Exception
    */
@@ -472,7 +575,7 @@ class OmniaController extends ControllerBase {
    * Retrieve video data field name.
    *
    * @return string
-   *    The name of the field.
+   *   The name of the field.
    *
    * @throws \Exception
    */

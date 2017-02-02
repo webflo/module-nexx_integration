@@ -28,6 +28,12 @@ Interesting mappigs are:
 # Drush integration
 To export existing taxonomy terms to Omnia use the following drush command:
 
-drush nexx-export-taxonomy vocabulary name
+* drush nexx-export-taxonomy vocabulary name
 
 When the given taxonomy vocabulary is mapped to an Omnia taxonomy, then all terms of this vocabulary will be pushed to Omnia.
+
+Delete and unpublish old videos which should be unpublished or deleted with this command:
+
+* drush nexx-perform-unpublish-delete
+
+Unpublish and delete actions are implemented into module but it does not handle old existing videos, to check them and unpublish and delete proper one please use this command, there is no update hook for it.

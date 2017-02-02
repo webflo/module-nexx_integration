@@ -17,8 +17,6 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
 
   use FieldUiTestTrait;
 
-  const TEST_NEXX_VIDEO_ID = 1;
-
   const TEST_VOCABULARIES = ['testChannel', 'testActor', 'testTags'];
 
   /**
@@ -121,7 +119,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    * Test the endpoint.
    */
   public function testVideoEndpoint() {
-    $data = $this->getTestVideoData();
+    $data = $this->getTestVideoData(1);
 
     // Test connectivity.
     $videoData = $this->postVideoData($data);
@@ -132,11 +130,13 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    * Test the created video entity.
    */
   public function testBasicVideoCreation() {
-    $data = $this->getTestVideoData();
+    $data = $this->getTestVideoData(2);
     $videoData = $this->postVideoData($data);
 
     $videoEntity = $this->loadVideoEntity($videoData->value);
     $videoField = $videoEntity->get('field_video');
+
+    $this->assertEquals($videoEntity->label(), $videoField->title);
 
     $this->assertEquals($data->itemData->itemID, $videoField->item_id);
     $this->assertEquals($data->itemData->title, $videoField->title);
@@ -159,6 +159,121 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $this->assertEquals($data->itemStates->isDeleted, $videoField->isDeleted);
     $this->assertEquals($data->itemStates->isBlocked, $videoField->isBlocked);
     $this->assertEquals($data->itemStates->encodedTHUMBS, 1);
+  }
+
+  /**
+   * Test the video entity 3: test active=0 during create.
+   */
+  public function testInactiveVideoCreation() {
+    $id = 3;
+    // Send active=0 now.
+    $data = $this->getTestVideoData($id, 0, 1, 0);
+    $videoData = $this->postVideoData($data);
+    $this->assertEquals($videoData->refnr, $id, "Video id is $id");
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertEquals($videoEntity->get("status")->getString(), 0, "Video id $id should be status=0 because of active=0");
+
+  }
+
+  /**
+   * Test the video entity 4: test active=0 during update.
+   */
+  public function testInactiveVideoUpdate() {
+    $id = 4;
+    // Send active=1 now.
+    $data = $this->getTestVideoData($id, 0, 1, 1);
+    $videoData = $this->postVideoData($data);
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertEquals(1, $videoEntity->get("status")->getString(), 'Video id
+    $id should be status=1 because of active=1'
+    );
+
+    // Send active=0 now.
+    $data = $this->getTestVideoData($id, 0, 1, 0);
+    $videoData = $this->postVideoData($data);
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertEquals(0, $videoEntity->get("status")->getString(), "Video id
+    $id should be status=0 because of active=0"
+    );
+  }
+
+  /**
+   * Test the video entity 5: test isSSC=0 during create.
+   */
+  public function testInactiveSscVideoCreation() {
+    $id = 5;
+    // Send isSSC=0 now.
+    $data = $this->getTestVideoData($id, 0, 0, 1);
+    $videoData = $this->postVideoData($data);
+    $this->assertEquals($videoData->refnr, $id, "Video id is $id");
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertEquals($videoEntity->get("status")->getString(), 0, "Video id $id should be status=1 because of isSSC=0.");
+  }
+
+  /**
+   * Test the video entity 6: test isSSC=0 during update.
+   */
+  public function testInactiveSscVideoUpdate() {
+    $id = 6;
+    // Send isSSC=1 now.
+    $data = $this->getTestVideoData($id, 0, 1, 1);
+    $videoData = $this->postVideoData($data);
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertEquals($videoEntity->get("status")->getString(), 1, "Video id
+    $id should be status=1 because of isSSC=1.");
+
+    // Send isSSC=0 now.
+    $data = $this->getTestVideoData($id, 0, 0, 1);
+    $videoData = $this->postVideoData($data);
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertEquals($videoEntity->get("status")->getString(), 0, "Video id
+    $id should be status=0 because of isSSC=0.");
+  }
+
+  /**
+   * Test the video entity 7: test deleted=1 during create.
+   */
+  public function testDeletedVideoCreate() {
+    $id = 7;
+    $count = $this->countVideos();
+    // Send delete=1 now.
+    $data = $this->getTestVideoData($id, 1, 1, 1);
+    $videoData = $this->postVideoData($data);
+    $this->assertEquals($videoData->refnr, $id, "Video id is $id");
+
+    $this->assertNull($videoData->value, "Response value should be NULL for video id $id, video was not created because it is deleted=1.");
+    $this->assertEquals($count, $this->countVideos(), "Counting all videos. Video id $id should not be created because it is deleted=1.");
+  }
+
+  /**
+   * Test the video entity 8: test deleted=1 during update.
+   */
+  public function testDeletedVideoUpdate() {
+    $id = 8;
+
+    // Send delete=0 now.
+    $data = $this->getTestVideoData($id, 0, 1, 1);
+    $videoData = $this->postVideoData($data);
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertEquals($videoEntity->get("status")->getString(), 1, "Video id
+    $id should be status=1 before deletion.");
+    $count = $this->countVideos();
+
+    // Send delete=1 now.
+    $data = $this->getTestVideoData($id, 1, 1, 1);
+    $videoData = $this->postVideoData($data);
+
+    $videoEntity = $this->loadVideoEntity($videoData->value);
+    $this->assertNull($videoEntity, "Video id $id should be deleted.");
+    $this->assertEquals($count - 1, $this->countVideos(), "Counting all videos 
+    after deletion. Video id $id should be deleted.");
   }
 
   /**
@@ -211,20 +326,50 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    *   The entity ID.
    *
    * @return EntityInterface
-   *   The vide entity.
+   *   The video entity.
    */
   protected function loadVideoEntity($videoId) {
+    /** @var EntityTypeManager $entityTypeManager */
     $entityTypeManager = $this->container->get('entity_type.manager');
-    return $entityTypeManager->getStorage('media')->load($videoId);
+
+    /** @var EntityStorageInterface $mediaStorage */
+    $mediaStorage = $entityTypeManager->getStorage('media');
+    $mediaStorage->resetCache([$videoId]);
+    return $mediaStorage->load($videoId);
+  }
+
+  /**
+   * Load a video media entity.
+   *
+   * @return int
+   *   Number of videos.
+   */
+  protected function countVideos() {
+    /** @var EntityTypeManager $entityTypeManager */
+    $entityTypeManager = $this->container->get('entity_type.manager');
+
+    /** @var EntityStorageInterface $mediaStorage */
+    $mediaStorage = $entityTypeManager->getStorage('media');
+    $mediaStorage->resetCache();
+    return count($mediaStorage->loadMultiple());
   }
 
   /**
    * Create test data string.
    *
-   * @return string
-   *   Test data.
+   * @param int $videoId
+   *   Setup video ID.
+   * @param int $isDeleted
+   *   Setup if idDeleted will be 0|1.
+   * @param int $isSSC
+   *   Setup if isSSC will be 0|1.
+   * @param int $active
+   *   Setup if active will be 0|1.
+   *
+   * @return \stdClass
+   *   Test video data object
    */
-  protected function getTestVideoData() {
+  protected function getTestVideoData($videoId, $isDeleted = 0, $isSSC = 1, $active = 1) {
     $tags = [];
     foreach ($this->terms['testTags'] as $tag) {
       $tags[] = $this->mapOmniaTermId($tag->id());
@@ -236,12 +381,12 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $channel = $this->mapOmniaTermId($this->terms['testChannel'][0]->id());
 
     $itemData = new \stdClass();
-    $itemData->itemID = self::TEST_NEXX_VIDEO_ID;
-    $itemData->hash = "GL7ADZXZJ" . self::TEST_NEXX_VIDEO_ID . "P";
+    $itemData->itemID = $videoId;
+    $itemData->hash = "GL7ADZXZJ" . $videoId . "P";
     $itemData->connector = "612";
-    $itemData->title = "Test Video";
+    $itemData->title = "Test Video $videoId";
     $itemData->teaser = "The teaser text.";
-    $itemData->description = "The description text";
+    $itemData->description = "The description text $videoId";
     $itemData->uploaded = 1463997938;
     $itemData->copyright = "Copyright notice";
     $itemData->encodedTHUMBS = "1";
@@ -252,7 +397,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $itemData->tags_ids = implode(',', $tags);
 
     $itemStates = new \stdClass();
-    $itemStates->isSSC = 1;
+    $itemStates->isSSC = $isSSC;
     $itemStates->encodedSSC = 1;
     $itemStates->validfrom_ssc = 0;
     $itemStates->validto_ssc = 0;
@@ -261,13 +406,13 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
     $itemStates->encodedMOBILE = 1;
     $itemStates->validfrom_mobile = 0;
     $itemStates->validto_mobile = 0;
-    $itemStates->active = 1;
-    $itemStates->isDeleted = 0;
+    $itemStates->active = $active;
+    $itemStates->isDeleted = $isDeleted;
     $itemStates->isBlocked = 0;
     $itemStates->encodedTHUMBS = 1;
 
     $baseData = new \stdClass();
-    $baseData->itemID = self::TEST_NEXX_VIDEO_ID;
+    $baseData->itemID = $videoId;
     $baseData->itemReference = "";
     $baseData->itemMime = "video";
     $baseData->clientID = "1";
@@ -286,10 +431,10 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    * Map drupal term Id to corresponding omnia term id.
    *
    * @param int $tid
-   *    The term id of the term.
+   *   The term id of the term.
    *
    * @return int
-   *    The omnia id of the term.
+   *   The omnia id of the term.
    */
   protected function mapOmniaTermId($tid) {
     $result = $this->database->select('nexx_taxonomy_term_data', 'n')
