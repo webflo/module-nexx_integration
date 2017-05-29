@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\media_entity\Entity\Media;
 
 /**
  * Implements hook_taxonomy_term_insert().
@@ -217,4 +218,52 @@ function update_nexx_term_id_mapping($drupal_id, $nexx_id) {
     'tid' => $drupal_id,
     'nexx_item_id' => $nexx_id,
   ])->execute();
+}
+
+/**
+ * Implements hook_cron().
+ */
+function nexx_integration_cron() {
+  /** @var \Drupal\nexx_integration\VideoManagerServiceInterface $videoManager */
+  $videoManager = \Drupal::getContainer()->get('nexx_integration.videomanager');
+  $logger = \Drupal::getContainer()->get('logger.factory')->get('nexx_integration');
+  $storage = \Drupal::entityTypeManager()->getStorage($videoManager->entityType());
+
+  $video_field = $videoManager->videoFieldName();
+
+  // Check videos, that could be activated.
+  /** @var \Drupal\Core\Entity\Query\QueryInterface $ids */
+  $ids = $storage->getQuery()
+    ->condition($video_field . '.validfrom_ssc', REQUEST_TIME, '<=')
+    ->condition($video_field . '.validto_ssc', REQUEST_TIME, '>')
+    ->condition("status", Media::NOT_PUBLISHED)
+    ->execute();
+
+  foreach ($storage->loadMultiple($ids) as $video) {
+    $video->set("status", Media::PUBLISHED);
+    $video->save();
+    $logger->info("Published nexx video \"@videoname\" (id: @id)", [
+      '@videoname' => $video->label(),
+      '@id' => $video->id(),
+    ]
+    );
+  }
+
+  /** @var \Drupal\Core\Entity\Query\QueryInterface $ids */
+  $ids = $storage->getQuery()
+    ->condition($video_field . '.validto_ssc', 0, '<>')
+    ->condition($video_field . '.validto_ssc', REQUEST_TIME, '<=')
+    ->condition("status", Media::PUBLISHED)
+    ->execute();
+
+  foreach ($storage->loadMultiple($ids) as $video) {
+    /** @var \Drupal\media_entity\MediaInterface $video */
+    $video->set("status", Media::NOT_PUBLISHED);
+    $video->save();
+    $logger->info("Unpublished nexx video \"@videoname\" (id: @id)", [
+      '@videoname' => $video->label(),
+      '@id' => $video->id(),
+    ]
+    );
+  }
 }
