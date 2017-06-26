@@ -19,8 +19,9 @@ function nexx_integration_taxonomy_term_insert(EntityInterface $term) {
   if (!empty($response_data['item'])) {
     $drupal_id = $term->id();
     $nexx_id = $response_data['item'];
+    $vid = $term->get('id')->getString();
 
-    update_nexx_term_id_mapping($drupal_id, $nexx_id);
+    update_nexx_term_id_mapping($drupal_id, $nexx_id, $vid);
   }
 }
 
@@ -51,8 +52,9 @@ function nexx_integration_taxonomy_term_update(EntityInterface $term) {
     if (!empty($response_data['item'])) {
       $drupal_id = $term->id();
       $nexx_id = $response_data['item'];
+      $vid = $term->get('id')->getString();
 
-      update_nexx_term_id_mapping($drupal_id, $nexx_id);
+      update_nexx_term_id_mapping($drupal_id, $nexx_id, $vid);
     }
   }
 }
@@ -209,14 +211,17 @@ function nexx_integration_taxonomy_term_nexx_id(EntityInterface $term) {
  *   The drupal tid of the term.
  * @param int $nexx_id
  *   The nexx id of the same term.
+ * @param int $vid
+ *   The drupal vid of the term.
  */
-function update_nexx_term_id_mapping($drupal_id, $nexx_id) {
+function update_nexx_term_id_mapping($drupal_id, $nexx_id, $vid) {
   $database = \Drupal::getContainer()->get('database');
   $database->merge('nexx_taxonomy_term_data')->key([
     'tid' => $drupal_id,
   ])->fields([
     'tid' => $drupal_id,
     'nexx_item_id' => $nexx_id,
+    'vid' => $vid,
   ])->execute();
 }
 

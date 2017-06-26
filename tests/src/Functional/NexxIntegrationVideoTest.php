@@ -436,13 +436,13 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
   protected function getTestVideoData($videoId) {
     $tags = [];
     foreach ($this->terms['testTags'] as $tag) {
-      $tags[] = $this->mapOmniaTermId($tag->id());
+      $tags[] = $this->mapOmniaTermId($tag->id(), 'tags');
     }
     $actors = [];
     foreach ($this->terms['testActor'] as $actor) {
-      $actors[] = $this->mapOmniaTermId($actor->id());
+      $actors[] = $this->mapOmniaTermId($actor->id(), 'star');
     }
-    $channel = $this->mapOmniaTermId($this->terms['testChannel'][0]->id());
+    $channel = $this->mapOmniaTermId($this->terms['testChannel'][0]->id(), 'channel');
 
     $itemData = new \stdClass();
     $itemData->itemID = $videoId;
@@ -496,14 +496,17 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
    *
    * @param int $tid
    *   The term id of the term.
+   * @param int $vid
+   *   The drupal vid of the term.
    *
    * @return int
    *   The omnia id of the term.
    */
-  protected function mapOmniaTermId($tid) {
+  protected function mapOmniaTermId($tid, $vid) {
     $result = $this->database->select('nexx_taxonomy_term_data', 'n')
       ->fields('n', ['nexx_item_id'])
       ->condition('n.tid', $tid)
+      ->condition('n.vid', $vid)
       ->execute();
 
     $drupal_id = $result->fetchField();
@@ -601,7 +604,7 @@ class NexxIntegrationVideoTest extends BrowserTestBase {
         $this->terms[$vocabularyName][$i] = $term;
 
         // Mapping an omnia ID.
-        update_nexx_term_id_mapping($term->id(), ($term->id() + 100));
+        update_nexx_term_id_mapping($term->id(), ($term->id() + 100), $vocabularyName);
       }
     }
   }
